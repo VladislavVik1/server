@@ -1,36 +1,25 @@
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import { User } from '../models/index.js'
+import bcrypt from 'bcrypt';
+import People from '../models/People.js';
+import Spec from '../models/Spec.js';
 
 export const register = async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    const user = await User.create({
-      email: req.body.email,
-      password: hashedPassword,
-      role: req.body.role || 'public',
-    })
-    res.status(201).json(user)
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
-}
+  const { email, password, role } = req.body;
 
-export const login = async (req, res) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   try {
-    console.log('req.body:', req.body)
-    const user = await User.findOne({ where: { email: req.body.email } })
-    if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' })
+    if (role === 'public') {
+      const newUser = new People({ email, password: hashedPassword });
+      await newUser.save();
+    } else if (role === 'responder') {
+      const newSpec = new Spec({ email, password: hashedPassword });
+      await newSpec.save();
+    } else {
+      return res.status(400).json({ message: 'Invalid role' });
     }
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    )
-    res.json({ token })
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
 
-}
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error registering user', error: err });
+  }
+};

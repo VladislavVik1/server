@@ -43,7 +43,7 @@ export const getMapData = async (req, res) => {
       });
     }
 
-    const heatmapData = await calculateHeatmap(); // це, ймовірно, лише для адміна
+    const heatmapData = await calculateHeatmap(); 
     const response = { reports };
 
     if (req.user.role === 'admin') {

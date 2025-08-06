@@ -10,14 +10,14 @@ export const getDashboardData = async (req, res) => {
         include: [{ model: User, attributes: ['email'] }],
       });
     } else {
-      // Тільки звіти створені цим користувачем
+
       reports = await CrimeReport.findAll({
         where: { userId: req.user.id },
         include: [{ model: User, attributes: ['email'] }],
       });
     }
 
-    // Загальна статистика тільки для адміна
+
     let stats = {};
     if (req.user.role === 'admin') {
       const types = await CrimeReport.findAll({
