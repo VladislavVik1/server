@@ -25,10 +25,17 @@ router.post('/register', async (req, res) => {
 
 // Логин
 router.post('/login', async (req, res) => {
+  console.log('💬 [Login] Body:', req.body);
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!user) {
+      console.warn('⚠️ [Login] User not found:', email);
+      return res.status(401).json({ message: 'Неверные учетные данные' });
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      console.warn('⚠️ [Login] Invalid password for:', email);
       return res.status(401).json({ message: 'Неверные учетные данные' });
     }
     const token = jwt.sign(
@@ -36,8 +43,10 @@ router.post('/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
+    console.log('✅ [Login] Success for:', email);
     res.json({ token });
   } catch (err) {
+    console.error('❌ [Login] Error:', err);
     res.status(500).json({ message: 'Ошибка сервера', error: err.message });
   }
 });

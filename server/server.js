@@ -12,6 +12,8 @@ import reportRoutes from './routes/reportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import mapRoutes from './routes/mapRoutes.js';
 import testRoutes from './routes/testRoutes.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
@@ -41,15 +43,22 @@ app.use('/api', dashboardRoutes);
 // Данные для карты
 app.use('/api', mapRoutes);
 
-// Статика React
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Статика React + шаблоны
 const buildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(buildPath)) {
+  // 1) Отдаём сам билд (js/css/html)
   app.use(express.static(buildPath));
-  app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(buildPath, 'index.html'));
-  });
+
+  // 2) Отдаём шаблоны из build/templates по /templates/*
+  const templatesPath = path.join(buildPath, 'templates');
+  if (fs.existsSync(templatesPath)) {
+    app.use('/templates', express.static(templatesPath));
+  }
+
+  // 3) Ловушка для всех остальных путей — отдаём index.html
+  app.get(/.*/, (req, res) =>
+    res.sendFile(path.join(buildPath, 'index.html'))
+  );
 }
 
 // Подключаемся к MongoDB и стартуем сервер
@@ -62,4 +71,8 @@ connectDB(process.env.MONGODB_URI)
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
+  });
+  app.use((err, req, res, next) => {
+    console.error('💥 Uncaught error:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
   });

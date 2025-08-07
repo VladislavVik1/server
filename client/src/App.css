@@ -1,0 +1,50 @@
+body, html, #root {
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  .app {
+    display: flex; height: 100%;
+  }
+  
+  .content {
+    flex: 1; padding: 20px; background: #f0f2f5;
+    overflow-y: auto;
+  }
+  
+  main .card {
+    background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;
+  }
+  
+  main table {
+    width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
+  }
+  
+  main th, main td {
+    padding: 12px; border-bottom: 1px solid #e0e0e0; text-align: left;
+  }
+  
+  main th {
+    background: #fafafa;
+  }
+  
+
+  .sidebar {
+    width: 200px; background: #1e3a8a; color: #fff;
+    display: flex; flex-direction: column; padding: 20px;
+  }
+  
+  .sidebar h2 { margin: 0 0 20px; }
+  
+  .sidebar ul { list-style: none; padding: 0; flex: 1; }
+  .sidebar li { margin-bottom: 12px; }
+  .sidebar a {
+    color: #fff; text-decoration: none; font-weight: bold;
+  }
+  .sidebar a.active {
+    color: #93c5fd;
+  }
+  .logout {
+    background: #ef4444; color: #fff; border: none; padding: 8px;
+    border-radius: 4px; cursor: pointer;
+  }

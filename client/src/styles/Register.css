@@ -1,0 +1,26 @@
+/* Общие стили уже заданные в Auth.css будут применяться */
+/* Дополнительные стили, если нужно */
+.auth-container {
+  /* наследуем флекс-центрирование */
+}
+
+.auth-card h3 {
+  margin-bottom: 24px;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+.auth-error {
+  min-height: 1.5em;
+}
+
+.auth-card select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+  appearance: none;
+}
