@@ -1,57 +1,64 @@
-import { CrimeReport } from '../models/index.js'
-import { calculateHeatmap } from './heatmapUtils.js'
+import CrimeReport from '../models/CrimeReport.js';
+import { calculateHeatmap } from './heatmapUtils.js';
 
-export const createReport = async (req, res) => {
-  try {
-    const report = await CrimeReport.create({
-      type: req.body.type,
-      description: req.body.description,
-      latitude: req.body.latitude,
-      longitude: req.body.longitude,
-      imagePath: req.file ? req.file.path : null,
-      UserId: req.user.id,
-    })
-    res.status(201).json(report)
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
+// ✅ Створення звіту
+export async function createReport(req) {
+  const { type, description, location } = req.body;
+
+  const parsedLocation = typeof location === 'string'
+  ? { address: location }
+  : location;
+
+  const newReport = await CrimeReport.create({
+    user: req.user.id,
+    type,
+    description,
+    location: parsedLocation,
+    imageUrl: req.file?.path || null
+  });
+
+  return newReport;
 }
 
-export const updateStatus = async (req, res) => {
-  try {
-    const report = await CrimeReport.findByPk(req.params.id)
-    if (!report) return res.status(404).send('Report not found')
-    report.status = req.body.status
-    await report.save()
-    res.json(report)
-  } catch (err) {
-    res.status(400).json({ error: err.message })
-  }
+// ✅ Оновлення статусу
+export async function updateStatus(req) {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const updated = await CrimeReport.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  );
+
+  return updated;
 }
-export const getMapData = async (req, res) => {
+
+// ✅ Всі звіти (тільки для responder/admin)
+export async function getAllReports() {
+  return await CrimeReport.find().populate('user', 'email role');
+}
+
+// ✅ Мої звіти (тільки для public)
+export async function getMyReports(userId) {
+  return await CrimeReport.find({ user: userId });
+}
+
+// ✅ Карта
+export async function getMapData(req, res) {
   try {
     let reports;
 
     if (req.user.role === 'admin') {
-      reports = await CrimeReport.findAll({
-        attributes: ['id', 'type', 'latitude', 'longitude', 'createdAt'],
-      });
+      reports = await CrimeReport.find({}, 'type location.createdAt');
     } else {
-      reports = await CrimeReport.findAll({
-        where: { userId: req.user.id },
-        attributes: ['id', 'type', 'latitude', 'longitude', 'createdAt'],
-      });
+      reports = await CrimeReport.find({ user: req.user.id }, 'type location.createdAt');
     }
 
-    const heatmapData = await calculateHeatmap(); 
-    const response = { reports };
+    const heatmapData = req.user.role === 'admin' ? await calculateHeatmap() : [];
 
-    if (req.user.role === 'admin') {
-      response.heatmapData = heatmapData;
-    }
-
-    res.json(response);
+    res.json({ reports, heatmapData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-};
+}
