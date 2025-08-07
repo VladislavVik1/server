@@ -1,3 +1,4 @@
+// ./routes/authRoutes.js
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -5,7 +6,7 @@ import User from '../models/User.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const { JWT_SECRET, JWT_EXPIRES_IN = '1d' } = process.env;
 
 // Регистрация
 router.post('/register', async (req, res) => {
@@ -18,7 +19,7 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ email, password: hash, role });
     res.status(201).json({ id: user._id, email: user.email, role: user.role });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: 'Ошибка сервера', error: err.message });
   }
 });
 
@@ -33,15 +34,15 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: JWT_EXPIRES_IN }
     );
     res.json({ token });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: 'Ошибка сервера', error: err.message });
   }
 });
 
-// Профиль (пример защищённого маршрута)
+// Пример защищённого маршрута
 router.get('/profile', authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   res.json(user);

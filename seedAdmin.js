@@ -1,3 +1,4 @@
+// ./seedAdmin.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
@@ -13,13 +14,13 @@ mongoose.connect(process.env.MONGODB_URI, {
   if (!await User.findOne({ email: adminEmail })) {
     const pwHash = await bcrypt.hash('SafeAndSafety', 10);
     await User.create({ email: adminEmail, password: pwHash, role: 'admin' });
-    console.log('✅ Admin user created');
+    console.log('✅ Admin created');
   } else {
     console.log('ℹ️  Admin already exists');
   }
   process.exit(0);
 })
 .catch(err => {
-  console.error('❌ Seed admin error:', err);
+  console.error('❌ Seed error:', err);
   process.exit(1);
 });
