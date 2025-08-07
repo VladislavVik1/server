@@ -17,6 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// CORS
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? process.env.CLIENT_URL
@@ -24,11 +25,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// API-маршруты
+// --- РЕГИСТРЫ МАРШРУТОВ ---
+// Аутентификация
 app.use('/api/auth', authRoutes);
+
+// Тестовый маршрут
 app.use('/api', testRoutes);
+
+// Отчёты о преступлениях
 app.use('/api', reportRoutes);
+
+// Дашборд
 app.use('/api', dashboardRoutes);
+
+// Данные для карты
 app.use('/api', mapRoutes);
 
 // Статика React
@@ -37,12 +47,12 @@ const __dirname = path.dirname(__filename);
 const buildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(buildPath)) {
   app.use(express.static(buildPath));
-  app.get('*', (req, res) =>
-    res.sendFile(path.join(buildPath, 'index.html'))
-  );
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
 }
 
-// Подключение к БД и запуск сервера
+// Подключаемся к MongoDB и стартуем сервер
 connectDB(process.env.MONGODB_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
