@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import api from '../api';
+import '../styles/ReportPage.css';
 
 export default function ReportPage() {
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
-  const [image, setImage] = useState(null); // 👈 нове поле
+  const [date, setDate] = useState('');   
+  const [image, setImage] = useState(null);
   const [msg, setMsg] = useState('');
 
   const submit = async e => {
@@ -14,7 +16,8 @@ export default function ReportPage() {
     const formData = new FormData();
     formData.append('type', type);
     formData.append('description', description);
-    formData.append('location', location); // можна лишити як string
+    formData.append('location', location); 
+    formData.append('date', date);   
     if (image) {
       formData.append('image', image);
     }
@@ -34,34 +37,13 @@ export default function ReportPage() {
   };
 
   return (
-    <form className="card" onSubmit={submit} style={{ maxWidth: 600 }}>
+    <form className="report-form" onSubmit={submit}>
       <h3>Report Crime</h3>
       {msg && <p>{msg}</p>}
-
-      <input
-        placeholder="Category"
-        value={type}
-        onChange={e => setType(e.target.value)}
-      />
-
-      <textarea
-        placeholder="Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-      />
-
-      <input
-        placeholder="Location"
-        value={location}
-        onChange={e => setLocation(e.target.value)}
-      />
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={e => setImage(e.target.files[0])}
-      />
-
+      <input placeholder="Type of Crime" value={type} onChange={e => setType(e.target.value)} />
+      <input placeholder="Date" value={date} onChange={e => setDate(e.target.value)} />
+      <input placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} />
+      <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
       <button type="submit">Submit</button>
     </form>
   );
