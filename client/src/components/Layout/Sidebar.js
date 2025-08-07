@@ -9,6 +9,7 @@ export default function Sidebar({ onLogout }) {
         <li><NavLink to="/dashboard">Dashboard</NavLink></li>
         <li><NavLink to="/map">Crime Map</NavLink></li>
         <li><NavLink to="/report">Report Crime</NavLink></li>
+        <li><NavLink to="/profile">Profile</NavLink></li>
       </ul>
       <button className="logout" onClick={onLogout}>Log Out</button>
     </nav>

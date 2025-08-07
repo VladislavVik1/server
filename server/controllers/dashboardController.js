@@ -1,37 +1,29 @@
-import { CrimeReport, User } from '../models/index.js'
-import { getCrimeStats } from './heatmapUtils.js'
+import CrimeReport from '../models/CrimeReport.js';
 
-export const getDashboardData = async (req, res) => {
-  try {
-    let reports;
-
-    if (req.user.role === 'admin') {
-      reports = await CrimeReport.findAll({
-        include: [{ model: User, attributes: ['email'] }],
-      });
-    } else {
-
-      reports = await CrimeReport.findAll({
-        where: { userId: req.user.id },
-        include: [{ model: User, attributes: ['email'] }],
-      });
-    }
-
-
-    let stats = {};
-    if (req.user.role === 'admin') {
-      const types = await CrimeReport.findAll({
-        attributes: ['type'],
-      });
-
-      stats.typeDistribution = types.reduce((acc, curr) => {
-        acc[curr.type] = (acc[curr.type] || 0) + 1;
-        return acc;
-      }, {});
-    }
-
-    res.json({ reports, stats });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+export async function getDashboardData(user) {
+  if (!['responder', 'admin'].includes(user.role)) {
+    throw new Error('Нет доступа');
   }
-};
+
+  // 📊 Подсчёт по статусу
+  const [pendingCount, approvedCount, rejectedCount] = await Promise.all([
+    CrimeReport.countDocuments({ status: 'pending' }),
+    CrimeReport.countDocuments({ status: 'approved' }),
+    CrimeReport.countDocuments({ status: 'rejected' }),
+  ]);
+
+  // 🕵️ Последние 5 отчётов
+  const recentReports = await CrimeReport.find()
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .select('type description status');
+
+  return {
+    stats: {
+      pending: pendingCount,
+      approved: approvedCount,
+      rejected: rejectedCount,
+    },
+    recent: recentReports,
+  };
+}

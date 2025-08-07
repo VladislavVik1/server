@@ -1,4 +1,7 @@
 // ./routes/authRoutes.js
+import dotenv from 'dotenv';
+dotenv.config(); // ← ОБЯЗАТЕЛЬНО первым
+
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -17,7 +20,14 @@ router.post('/register', async (req, res) => {
     }
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hash, role });
-    res.status(201).json({ id: user._id, email: user.email, role: user.role });
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+    
+    res.status(201).json({ token, role: user.role });
   } catch (err) {
     res.status(500).json({ message: 'Ошибка сервера', error: err.message });
   }

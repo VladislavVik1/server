@@ -1,11 +1,10 @@
-// ./routes/dashboardRoutes.js
+// routes/dashboardRoutes.js
 import express from 'express';
 import { getDashboardData } from '../controllers/dashboardController.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Доступ к дашборду только для ролей 'responder' и 'admin'
 router.get(
   '/dashboard',
   authenticate(['responder', 'admin']),

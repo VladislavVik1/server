@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import api from '../api';
 import '../styles/Login.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage({ onLogin }) {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Загружаем HTML-шаблон
     fetch('/templates/Login.html')
       .then(res => res.text())
       .then(html => {
@@ -21,25 +23,27 @@ export default function LoginPage({ onLogin }) {
     const submitBtn = document.getElementById('login-submit');
     const regLink = document.getElementById('login-to-register');
 
-    // Логика кнопки логина
+    // 🔐 Логін
     submitBtn.addEventListener('click', async () => {
       try {
         const { data } = await api.post('/api/auth/login', {
           email: emailEl.value,
-          password: passEl.value
+          password: passEl.value,
         });
-        onLogin(data.token);
+
+        onLogin(data.token);        // збереження токена
+        navigate('/dashboard');     // ✅ редирект після логіна
       } catch (err) {
         errorEl.textContent = err.response?.data?.message || 'Ошибка сервера';
       }
     });
 
-    // Переход на страницу регистрации
+    // 🔁 Перехід до реєстрації
     regLink.addEventListener('click', (e) => {
       e.preventDefault();
-      window.location.href = '/register';
+      navigate('/register'); // 🧼 краще через navigate, ніж через window.location
     });
   }
 
-  return null; // React-рендеринг отдаётся через шаблон
+  return null;
 }

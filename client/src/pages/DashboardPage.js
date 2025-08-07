@@ -1,40 +1,55 @@
+// client/src/pages/DashboardPage.js
 import React, { useEffect, useState } from 'react';
+import '../styles/Dashboard.css'; 
 import api from '../api';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState(null);
-
+  const [stats, setStats] = useState({ new: 0, investigating: 0, resolved: 0 });
+  const [reports, setReports] = useState([]);
   useEffect(() => {
-    api.get('/api/dashboard')
-      .then(res => setStats(res.data))
-      .catch(console.error);
+    async function fetchData() {
+      try {
+        const res = await api.get('/api/dashboard');
+        setStats(res.data.stats);
+        setReports(res.data.recent);
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      }
+    }
+    fetchData();
   }, []);
-
-  if (!stats) return <p>Loading...</p>;
+  
 
   return (
-    <>
-      <div className="card" style={{ display:'flex', gap:'16px' }}>
-        <div>New Reports: {stats.newReports}</div>
-        <div>Under Investigation: {stats.underInvestigation}</div>
-        <div>Resolved: {stats.resolved}</div>
+    <div className="dashboard-page">
+      <h2>Dashboard</h2>
+
+      <div className="dashboard-stats">
+        <div className="stat-box blue">📝 <strong>{stats.new}</strong><br />New Reports</div>
+        <div className="stat-box orange">🔍 <strong>{stats.investigating}</strong><br />Under Investigation</div>
+        <div className="stat-box green">✅ <strong>{stats.resolved}</strong><br />Resolved</div>
       </div>
 
-      <h4>Recent Reports</h4>
-      <table>
+      <h3>Recent Reports</h3>
+      <table className="dashboard-table">
         <thead>
-          <tr><th>Category</th><th>Description</th><th>Status</th></tr>
+          <tr>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Opposed</th>
+          </tr>
         </thead>
         <tbody>
-          {stats.recentReports.map(r => (
-            <tr key={r._id}>
-              <td>{r.type}</td>
-              <td>{r.description}</td>
-              <td>{r.status}</td>
+          {reports.map((r, i) => (
+            <tr key={i}>
+<td>{r.type}</td>
+<td>{r.description}</td>
+<td>{r.status}</td>
+
             </tr>
           ))}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }
