@@ -3,7 +3,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 const { JWT_SECRET, JWT_EXPIRES_IN = '1d' } = process.env;
@@ -43,9 +43,13 @@ router.post('/login', async (req, res) => {
 });
 
 // Пример защищённого маршрута
-router.get('/profile', authMiddleware, async (req, res) => {
-  const user = await User.findById(req.user.id).select('-password');
-  res.json(user);
+router.get('/profile', authenticate(), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+  }
 });
 
 export default router;

@@ -1,30 +1,34 @@
-import { Sequelize } from 'sequelize';
-import UserModel from './User.js';
-import ReportModel from './CrimeReport.js';
-import PeopleModel from './People.js';
-import SpecModel from './Spec.js';
+// ./models/index.js
+import mongoose from 'mongoose';
+import CrimeReport from './CrimeReport.js';
+import People from './People.js';
+import Spec from './Spec.js';
+import User from './User.js';
 
-// Инициализация подключения к SQLite
-export const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite',
-});
+/**
+ * Функция подключения к MongoDB
+ * @param {string} uri - строка подключения к MongoDB
+ * @returns {Promise<mongoose.Connection>}
+ */
+export function connectDB(uri) {
+  return mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+}
 
-// Инициализация моделей
-export const User = UserModel(sequelize);
-export const CrimeReport = ReportModel(sequelize);
-export const People = PeopleModel(sequelize);
-export const Spec = SpecModel(sequelize);
-
-// Связи между моделями
-User.hasMany(CrimeReport, { foreignKey: 'userId' });
-CrimeReport.belongsTo(User, { foreignKey: 'userId' });
-
-// Экспорт для использования в приложении
-export default {
-  sequelize,
-  User,
+// Экспорт моделей
+export {
   CrimeReport,
   People,
   Spec,
+  User,
+};
+
+export default {
+  connectDB,
+  CrimeReport,
+  People,
+  Spec,
+  User,
 };
