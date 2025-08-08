@@ -1,4 +1,3 @@
-// controllers/authController.js
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import AuthUser from '../models/AuthUser.js';
@@ -9,28 +8,49 @@ const { JWT_SECRET = 'dev_secret', JWT_EXPIRES_IN = '1d' } = process.env;
 
 export const register = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const emailRaw = String(req.body.email || '').trim();
+    const password = String(req.body.password || '');
+    const role = String(req.body.role || '').trim();
 
-    if (!email || !password || !role) {
+    if (!emailRaw || !password || !role) {
       return res.status(400).json({ message: 'email, password и role обязательны' });
     }
     if (!['public', 'responder', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Недопустимая роль' });
     }
 
-    const exists = await AuthUser.findOne({ email });
-    if (exists) return res.status(400).json({ message: 'Email уже занят' });
+    const emailLC = emailRaw.toLowerCase();
+
+    const existsAuth = await AuthUser.findOne({ email: emailRaw });
+    const existsPeople = await People.findOne({ email: emailLC });
+    const existsSpec = await Spec.findOne({ email: emailLC });
+    if (existsAuth || existsPeople || existsSpec) {
+      return res.status(409).json({ message: 'Email уже занят' });
+    }
 
     const hash = await bcrypt.hash(password, 10);
-    const auth = await AuthUser.create({ email, password: hash, role });
 
-    // Создаём профиль под роль
+    const auth = await AuthUser.create({
+      email: emailRaw,
+      password: hash,
+      role
+    });
+
+    let profileDoc = null;
     if (role === 'public') {
-      await People.create({ user: auth._id, email });
+      profileDoc = await People.create({
+        user: auth._id,
+        email: emailLC,
+        role,
+        password: hash // убери, если пароль в People не нужен
+      });
     } else if (role === 'responder') {
-      await Spec.create({ user: auth._id, email });
-    } else {
-      // admin — профиль опционален, можно завести отдельную коллекцию, если надо
+      profileDoc = await Spec.create({
+        user: auth._id,
+        email: emailLC,
+        role,
+        password: hash // убери, если пароль в Spec не нужен
+      });
     }
 
     const token = jwt.sign(
@@ -39,16 +59,21 @@ export const register = async (req, res) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    return res.status(201).json({ token, role: auth.role });
+    return res.status(201).json({ token, role: auth.role, userId: auth._id, profileId: profileDoc?._id || null });
   } catch (err) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ message: 'Email уже занят' });
+    }
     return res.status(500).json({ message: 'Ошибка регистрации', error: err.message });
   }
 };
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const auth = await AuthUser.findOne({ email });
+    const emailRaw = String(req.body.email || '').trim();
+    const password = String(req.body.password || '');
+
+    const auth = await AuthUser.findOne({ email: emailRaw });
     if (!auth) return res.status(401).json({ message: 'Неверные учетные данные' });
 
     const ok = await bcrypt.compare(password, auth.password);
@@ -67,7 +92,6 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    // req.user приходит из authenticate() — { id, email, role }
     const { id, role } = req.user;
 
     const auth = await AuthUser.findById(id).select('-password');
@@ -75,12 +99,11 @@ export const getProfile = async (req, res) => {
 
     let profile = null;
     if (role === 'public') {
-      profile = await People.findOne({ user: id });
+      profile = await People.findOne({ user: id }).select('-password');
     } else if (role === 'responder') {
-      profile = await Spec.findOne({ user: id });
+      profile = await Spec.findOne({ user: id }).select('-password');
     }
 
-    // Склеиваем базовые поля + профиль по роли
     return res.json({
       id: auth._id,
       email: auth.email,
@@ -88,10 +111,10 @@ export const getProfile = async (req, res) => {
       profileId: profile?._id || null,
       name: profile?.name || '',
       avatar: profile?.avatar || '',
-      phone: profile?.phone,         // только в People (может быть undefined)
-      department: profile?.department, // только в Spec (может быть undefined)
+      phone: profile?.phone,
+      department: profile?.department,
       createdAt: auth.createdAt,
-      updatedAt: auth.updatedAt,
+      updatedAt: auth.updatedAt
     });
   } catch (err) {
     return res.status(500).json({ message: 'Ошибка сервера', error: err.message });

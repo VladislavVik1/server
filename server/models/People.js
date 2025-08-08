@@ -19,8 +19,7 @@ const PeopleSchema = new Schema(
       required: true,
     },
   },
-  { timestamps: true, collection: 'peoples' } // 👈 коллекция как у тебя
+  { timestamps: true, collection: 'peoples' }
 );
 
-// защита от повторной компиляции в dev
 export default mongoose.models.People || model('People', PeopleSchema);

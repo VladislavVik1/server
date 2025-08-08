@@ -19,7 +19,7 @@ const SpecSchema = new Schema(
       required: true,
     },
   },
-  { timestamps: true, collection: 'spec' } // 👈 коллекция как у тебя
+  { timestamps: true, collection: 'spec' }
 );
 
 export default mongoose.models.Spec || model('Spec', SpecSchema);
