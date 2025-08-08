@@ -22,7 +22,7 @@ const crimeReportSchema = new mongoose.Schema({
   imageUrl: String,
   status: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'closed'],
     default: 'pending',
   }
 }, {

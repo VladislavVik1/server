@@ -1,0 +1,249 @@
+:root {
+    --rf-navy: #0d3b66;
+    --rf-red: #d93030;
+    --rf-border: #E3E8F5;
+    --rf-text: #2A3547;
+    --rf-muted: #6B7A90;
+    --rf-bg: #F6F8FF;
+    --rf-shadow: 0 8px 24px rgba(13, 59, 102, 0.06);
+  
+    --rf-pad-y: 12px;
+    --rf-pad-x: 12px;
+    --rf-minh: 44px;
+  }
+  
+  /* Контейнер */
+  .rf-wrap {
+    padding: 20px 12px;
+    background: var(--rf-bg);
+    min-height: 100%;
+  }
+  .rf-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .rf-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #000;
+  }
+  .rf-title {
+    font-weight: 800;
+    color: #000;
+  }
+  
+  /* Красная плашка */
+  .rf-banner {
+    max-width: 540px;
+    margin: 0 auto 12px;
+    background: var(--rf-red);
+    color: #fff;
+    font-weight: 800;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+  
+  /* Карточка формы */
+  .rf-card {
+    max-width: 540px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--rf-border);
+    border-radius: 12px;
+    box-shadow: var(--rf-shadow);
+    padding: 14px;
+  }
+  
+  /* Сообщения */
+  .rf-alert {
+    background: #fff7e6;
+    border: 1px solid #ffe0a3;
+    color: #7a5200;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  
+  /* Сетка формы */
+  .rf-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  /* Группа полей */
+  .rf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .rf-field label {
+    color: #111;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  /* Поля ввода */
+  .rf-field input[type="text"],
+  .rf-field input[type="date"],
+  .rf-field input[type="time"],
+  .rf-field input[type="email"],
+  .rf-field input[type="url"],
+  .rf-field select,
+  .rf-field textarea,
+  .rf-col input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--rf-pad-y) var(--rf-pad-x);
+    min-height: var(--rf-minh);
+    border: 1px solid var(--rf-border);
+    border-radius: 10px;
+    font: inherit;
+    line-height: 1.2;
+    background: #fff;
+    color: var(--rf-text);
+  }
+  
+  /* У date/time место под иконку */
+  .rf-field input[type="date"],
+  .rf-field input[type="time"] {
+    padding-right: 40px;
+  }
+  
+  /* textarea фиксированной высоты */
+  .rf-field textarea {
+    height: 96px;
+    resize: none;
+  }
+  
+  /* Группы имён (лейбл + 2 поля) */
+  .rf-group {
+    margin-bottom: 12px;
+  }
+  .rf-group > label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .rf-row-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 680px) {
+    .rf-row-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .rf-col input {
+    width: 100%;
+    display: block;
+  }
+  .rf-sublabel {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--rf-muted);
+  }
+  
+  /* Drag&drop */
+  .rf-drop {
+    position: relative;
+    border: 2px dashed #C9D4F1;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+  .rf-drop--drag {
+    background: #F3F7FF;
+    border-color: #8AA5E9;
+  }
+  .rf-drop input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .rf-drop-ico {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 6px;
+    background: #EEF2FF;
+    border-radius: 50%;
+  }
+  .rf-drop-title {
+    font-weight: 800;
+    color: #223;
+  }
+  .rf-drop-sub {
+    color: #778;
+    font-size: 12px;
+  }
+  .rf-files {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .rf-files span {
+    background: #F1F5FF;
+    border: 1px solid var(--rf-border);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  /* Чекбокс */
+  .rf-confirm {
+    margin-top: 6px;
+  }
+  .rf-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+  }
+  .rf-check input {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Кнопки */
+  .rf-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .btn {
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    width: 48%;
+    min-height: var(--rf-minh);
+  }
+  .btn.primary {
+    background: var(--rf-navy);
+    color: #fff;
+  }
+  .btn.ghost {
+    background: #F1F5FF;
+    color: #123;
+    border: 1px solid var(--rf-border);
+  }
+  
+  /* На десктопе — всегда 1 колонка */
+  @media (min-width: 860px) {
+    .rf-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  

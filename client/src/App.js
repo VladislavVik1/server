@@ -6,18 +6,26 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import MapPage from './pages/MapPage';
 import ReportPage from './pages/ReportPage';
-import { setAuthToken } from './api';
 import ProfilePage from './pages/ProfilePage';
+import ModerationPage from './pages/ModerationPage';
+import { setAuthToken } from './api';
+import api from './api';
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const navigate = useNavigate(); // ⬅️ додали
+  const [role, setRole] = useState('');
+  const navigate = useNavigate();
 
-  // Применяем токен ко всем axios-запросам
   useEffect(() => {
     if (token) {
       setAuthToken(token);
-      navigate('/dashboard'); // ⬅️ автоматический переход
+
+      // Загружаем роль пользователя
+      api.get('/api/auth/profile')
+        .then(res => setRole(res.data.role))
+        .catch(() => setRole(''));
+
+      navigate('/dashboard');
     }
   }, [token]);
 
@@ -29,12 +37,13 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
+    setRole('');
     navigate('/login');
   };
 
   return (
     <div className="app">
-      {token && <Sidebar onLogout={handleLogout} />}
+      {token && <Sidebar onLogout={handleLogout} role={role} />}
       <main className="content">
         <Routes>
           {/* Публичные маршруты */}
@@ -48,6 +57,9 @@ export default function App() {
               <Route path="/map" element={<MapPage />} />
               <Route path="/report" element={<ReportPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              {role === 'admin' || role === 'responder' ? (
+                <Route path="/moderation" element={<ModerationPage />} />
+              ) : null}
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </>
           ) : (

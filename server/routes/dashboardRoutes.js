@@ -1,21 +1,11 @@
-// routes/dashboardRoutes.js
+// server/routes/dashboardRoutes.js
 import express from 'express';
-import { getDashboardData } from '../controllers/dashboardController.js';
 import { authenticate } from '../middleware/auth.js';
+import { getDashboardSummary } from '../controllers/dashboardController.js';
 
 const router = express.Router();
 
-router.get(
-  '/dashboard',
-  authenticate(['responder', 'admin']),
-  async (req, res) => {
-    try {
-      const data = await getDashboardData(req.user);
-      res.json(data);
-    } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
-    }
-  }
-);
+// Дашборд-резюме — для всех авторизованных
+router.get('/dashboard/summary', authenticate(['public','responder','admin']), getDashboardSummary);
 
 export default router;

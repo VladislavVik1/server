@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-export default function Sidebar({ onLogout }) {
+export default function Sidebar({ onLogout, role }) {
   return (
     <nav className="sidebar">
       <h2>CrimeBook</h2>
@@ -10,6 +10,9 @@ export default function Sidebar({ onLogout }) {
         <li><NavLink to="/map">Crime Map</NavLink></li>
         <li><NavLink to="/report">Report Crime</NavLink></li>
         <li><NavLink to="/profile">Profile</NavLink></li>
+        {(role === 'admin' || role === 'responder') && (
+          <li><NavLink to="/moderation">Moderation</NavLink></li>
+        )}
       </ul>
       <button className="logout" onClick={onLogout}>Log Out</button>
     </nav>

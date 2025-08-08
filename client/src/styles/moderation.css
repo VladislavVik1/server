@@ -1,0 +1,31 @@
+.mod-list { display: grid; gap: 12px; padding: 12px 16px 16px; }
+.mod-item { border:1px solid var(--c-border); border-radius:14px; background:#fff; box-shadow: var(--shadow-1); }
+.mod-head { display:flex; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--c-border); color:var(--c-navy); }
+.badge { padding:4px 8px; border-radius:10px; font-size:12px; text-transform:uppercase; }
+.badge.pending { background:#fff7e6; }
+.badge.approved { background:#e9f9f1; }
+.badge.denied { background:#ffe9e9; }
+
+.mod-body { display:grid; grid-template-columns: 1fr 220px; gap:12px; padding:12px 14px; }
+.mod-col .line { margin:6px 0; color:#405169; }
+.mod-col .line span { color:#6b7a90; margin-right:4px; }
+.mod-img { width:100%; border-radius:10px; border:1px solid var(--c-border); }
+
+.status-toggle { display:flex; gap:8px; padding:12px 14px; border-top:1px dashed #e5ecfb; }
+.btn { border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; }
+.btn.ok { background:#16a34a; color:#fff; }
+.btn.warn { background:#ef4444; color:#fff; }
+.err { color:#b42318; font-size:12px; margin-left:auto; align-self:center; }
+.p-pad { padding:14px; }
+.mod-toast{
+    background:#fff7e6; border:1px solid #ffe0a3; color:#7a5200;
+    padding:8px 12px; border-radius:8px; margin:0 0 10px 0; font-weight:700;
+  }
+  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color:#555; }
+.mod-toolbar{ display:flex; justify-content:flex-start; margin-bottom:10px; }
+.mod-filters{ display:flex; gap:8px; flex-wrap:wrap; }
+.mf-btn{ border:1px solid #E3E8F5; background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+.mf-btn.active{ background:#0d3b66; color:#fff; border-color:#0d3b66; }
+.status-toggle{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.st-btn{ border:1px solid #E3E8F5; background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+.st-btn.active{ background:#0d3b66; color:#fff; border-color:#0d3b66; }

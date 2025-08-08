@@ -26,7 +26,7 @@ app.use(cors({
     : 'http://localhost:3000'
 }));
 app.use(express.json());
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // --- РЕГИСТРЫ МАРШРУТОВ ---
 // Аутентификация
 app.use('/api/auth', authRoutes);
