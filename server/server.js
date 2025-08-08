@@ -73,7 +73,7 @@ async function ensureAdmin() {
 }
 
 // Подключаемся к MongoDB и стартуем сервер
-connectDB(process.env.MONGODB_URI)
+connectDB(process.env.MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB connected');
     await ensureAdmin(); // 🔹 автосоздание админа

@@ -13,7 +13,7 @@ import Spec from '../models/Spec.js';         // коллекция: spec (respo
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
-const { JWT_SECRET = 'dev_secret', JWT_EXPIRES_IN = '1d' } = process.env;
+const { JWT_SECRET = 'dev_secret', JWT_EXPIRATION = '1d' } = process.env;
 
 /**
  * POST /api/auth/register

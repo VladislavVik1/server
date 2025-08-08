@@ -1,29 +1,35 @@
-// middleware/auth.js
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const { JWT_SECRET = 'dev_secret' } = process.env;
+// ✅ Грузим .env ДО чтения process.env
+dotenv.config();
 
 /**
  * authenticate({ roles: ['admin', 'responder'], allowCookie: true })
  * Кладёт в req.user: { id, email, role, iat, exp }
+ *
+ * ✅ КЛЮЧЕВАЯ ПОПРАВКА:
+ * раньше JWT_SECRET читался на уровне модуля ДО загрузки dotenv
+ * (импортом из другого файла), из-за чего становился 'dev_secret'
+ * и verify падал 401. Теперь секрет читается после dotenv и при каждом вызове.
  */
+const getSecret = () => process.env.JWT_SECRET || 'dev_secret';
+
 export const authenticate = (opts = {}) => (req, res, next) => {
   try {
-    // Пропускаем preflight
     if (req.method === 'OPTIONS') return next();
 
     const header = (req.headers.authorization || '').trim();
     const m = /^Bearer\s+(.+)$/i.exec(header);
     let token = m ? m[1].trim() : null;
 
-    // опционально читаем из cookie
     if (!token && opts.allowCookie && req.cookies?.token) {
       token = req.cookies.token;
     }
-
     if (!token) return res.status(401).json({ message: 'Нет токена' });
 
-    const payload = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, getSecret());
+
     req.user = {
       id: payload.id,
       email: payload.email,
@@ -42,8 +48,4 @@ export const authenticate = (opts = {}) => (req, res, next) => {
   }
 };
 
-/**
- * Шорткат для проверки ролей:
- * router.get('/admin', requireRoles('admin'), handler)
- */
 export const requireRoles = (...roles) => authenticate({ roles });
