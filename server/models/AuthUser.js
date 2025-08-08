@@ -1,12 +1,23 @@
 import mongoose from 'mongoose';
 
-const AuthUserSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+
+const AuthUserSchema = new Schema(
   {
-    email: { type: String, required: true, unique: true, index: true, trim: true }, // регистр СОХРАНЯЕМ
+    email: { type: String, required: true, trim: true },            // храните как вводит пользователь
+    email_lc: { type: String, required: true, index: true },        // для уникального индекса email_lc_1
     password: { type: String, required: true },
-    role: { type: String, enum: ['public', 'responder', 'admin'], required: true },
+    role: { type: String, enum: ['admin', 'public', 'responder'], required: true }
   },
-  { timestamps: true, collection: 'pwd' }
+  { timestamps: true }
 );
 
-export default mongoose.models.AuthUser || mongoose.model('AuthUser', AuthUserSchema);
+// Автоматически проставляем email_lc
+AuthUserSchema.pre('validate', function (next) {
+  if (this.email) {
+    this.email_lc = String(this.email).trim().toLowerCase();
+  }
+  next();
+});
+
+export default model('AuthUser', AuthUserSchema, 'pwd');
