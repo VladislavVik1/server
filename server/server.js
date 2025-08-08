@@ -1,4 +1,3 @@
-// server/server.js
 import express from 'express';
 import { connectDB } from './models/index.js';
 import dotenv from 'dotenv';
@@ -6,10 +5,6 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-
-// 🔹 добавляем
-import bcrypt from 'bcrypt';
-import AuthUser from './models/AuthUser.js';
 
 import authRoutes from './routes/authRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
@@ -30,8 +25,14 @@ app.use(cors({
     ? process.env.CLIENT_URL
     : 'http://localhost:3000'
 }));
+
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ гарантируем директорию uploads (иначе могут быть ENOENT)
+const uploadsDir = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
+app.use('/uploads', express.static(uploadsDir));
 
 // --- РЕГИСТРЫ МАРШРУТОВ ---
 app.use('/api/auth', authRoutes);
@@ -53,30 +54,12 @@ if (fs.existsSync(buildPath)) {
   );
 }
 
-// 🔹 функция проверки/создания админа
-async function ensureAdmin() {
-  const email = 'CrimeWatch@adm';
-  const plainPassword = 'SafeAndSafety';
-
-  const exists = await AuthUser.findOne({ email });
-  if (!exists) {
-    const hash = await bcrypt.hash(plainPassword, 10);
-    await AuthUser.create({
-      email,
-      password: hash,
-      role: 'admin',
-    });
-    console.log(`✅ Admin created: ${email}`);
-  } else {
-    console.log(`ℹ️ Admin already exists: ${email}`);
-  }
-}
+// ❌ убрали автосоздание админа — админ уже есть в БД
 
 // Подключаемся к MongoDB и стартуем сервер
 connectDB(process.env.MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB connected');
-    await ensureAdmin(); // 🔹 автосоздание админа
     app.listen(PORT, () =>
       console.log(`🚀 Server running on port ${PORT}`)
     );

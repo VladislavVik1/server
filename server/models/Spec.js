@@ -1,16 +1,25 @@
-// models/Spec.js
 import mongoose from 'mongoose';
 
-const SpecSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+
+const SpecSchema = new Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'AuthUser', required: true, unique: true },
-    email: { type: String, required: true },
-    name: { type: String, default: '' },
-    avatar: { type: String, default: '' },
-    department: { type: String, default: '' },
-    // поля профиля "respondерa"
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ['responder'],
+      default: 'responder',
+      required: true,
+    },
   },
-  { timestamps: true, collection: 'spec' }
+  { timestamps: true, collection: 'spec' } // 👈 коллекция как у тебя
 );
 
-export default mongoose.model('Spec', SpecSchema);
+export default mongoose.models.Spec || model('Spec', SpecSchema);

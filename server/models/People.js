@@ -1,16 +1,26 @@
-// models/People.js
 import mongoose from 'mongoose';
 
-const PeopleSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+
+const PeopleSchema = new Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'AuthUser', required: true, unique: true },
-    email: { type: String, required: true }, // дублируем для удобства выборок (необязательно)
-    name: { type: String, default: '' },
-    avatar: { type: String, default: '' },
-    phone: { type: String, default: '' },
-    // любые поля профиля "гражданина"
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ['public'],
+      default: 'public',
+      required: true,
+    },
   },
-  { timestamps: true, collection: 'peoples' }
+  { timestamps: true, collection: 'peoples' } // 👈 коллекция как у тебя
 );
 
-export default mongoose.model('People', PeopleSchema);
+// защита от повторной компиляции в dev
+export default mongoose.models.People || model('People', PeopleSchema);

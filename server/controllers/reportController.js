@@ -19,7 +19,7 @@ async function geocodeAddress(address) {
 
 // ✅ Создание отчета
 export async function createReport(req) {
-  const { type, description, location, date } = req.body;
+  const { type, description, location, date, comments } = req.body;
 
   const parsedLocation =
     typeof location === 'string' ? { address: location } : (location || {});
@@ -34,6 +34,7 @@ export async function createReport(req) {
     user: req.user.id,
     type,
     description,
+    comments,
     location: {
       address: parsedLocation.address || '',
       coordinates: coords,

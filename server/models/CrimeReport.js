@@ -2,22 +2,8 @@ import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
 
-/**
- * FIX: в контроллере createReport сохраняется объект:
- * location: { address: String, coordinates: { lat: Number, lng: Number } }
- * imageUrl: String
- *
- * Ранее в схеме было: location: String (и image/attachments в другом виде),
- * из-за чего валидатор падал: "Cast to string failed at path 'location'".
- *
- * Приводим схему в соответствие с контроллером.
- */
-
 const CoordinatesSchema = new Schema(
-  {
-    lat: { type: Number, default: null },
-    lng: { type: Number, default: null },
-  },
+  { lat: { type: Number, default: null }, lng: { type: Number, default: null } },
   { _id: false }
 );
 
@@ -31,15 +17,31 @@ const LocationSchema = new Schema(
 
 const CrimeReportSchema = new Schema(
   {
+    // Основное
     type: { type: String, required: true },
     description: { type: String, default: '' },
+    comments: { type: String, default: '' }, // 👈 добавили
 
-    // ✅ теперь объект, как пишет контроллер
+    // Локация и дата инцидента
     location: { type: LocationSchema, default: () => ({}) },
+    date: { type: Date }, // когда случилось
 
-    date: { type: Date },
+    // Дата подачи отчёта (из формы)
+    reportIssuedAt: { type: Date, default: null }, // 👈 добавили
 
-    // ✅ как в контроллере
+    // Кем подан
+    issuerFirst: { type: String, default: '' },   // 👈 добавили
+    issuerLast:  { type: String, default: '' },   // 👈 добавили
+
+    // Вопросы
+    suspectAware:  { type: String, default: '' }, // 👈 добавили
+    arrestsSoFar:  { type: String, default: '' }, // 👈 добавили
+
+    // Подозреваемый
+    suspectFirst: { type: String, default: '' },  // 👈 добавили
+    suspectLast:  { type: String, default: '' },  // 👈 добавили
+
+    // Медиа
     imageUrl: { type: String, default: null },
     attachments: [{ type: String }],
 
@@ -51,7 +53,7 @@ const CrimeReportSchema = new Schema(
       default: 'People',
     },
 
-    // ⚠️ контроллер может писать 'rejected', добавляем в enum
+    // Статус
     status: {
       type: String,
       enum: ['pending', 'approved', 'denied', 'rejected', 'closed'],
@@ -61,6 +63,5 @@ const CrimeReportSchema = new Schema(
   { timestamps: true }
 );
 
-// Чтобы не падать при хот-релоаде в dev
 export default mongoose.models.CrimeReport ||
   model('CrimeReport', CrimeReportSchema);
