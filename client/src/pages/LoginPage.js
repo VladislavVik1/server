@@ -19,29 +19,35 @@ export default function LoginPage({ onLogin }) {
   function attachLogic() {
     const emailEl = document.getElementById('login-username');
     const passEl = document.getElementById('login-password');
+    const roleEl = document.getElementById('login-role'); // селект роли
     const errorEl = document.getElementById('login-error');
     const submitBtn = document.getElementById('login-submit');
     const regLink = document.getElementById('login-to-register');
 
-    // 🔐 Логін
+    // 🔐 Логин
     submitBtn.addEventListener('click', async () => {
       try {
         const { data } = await api.post('/api/auth/login', {
-          email: emailEl.value,
+          email: emailEl.value.trim(),
           password: passEl.value,
+          role: roleEl.value // отправляем роль
         });
 
-        onLogin(data.token);        // збереження токена
-        navigate('/dashboard');     // ✅ редирект після логіна
+        // ✅ сохраняем токен и роль
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+
+        onLogin?.(data.token);
+        navigate('/dashboard');
       } catch (err) {
         errorEl.textContent = err.response?.data?.message || 'Ошибка сервера';
       }
     });
 
-    // 🔁 Перехід до реєстрації
+    // 🔁 Переход к регистрации
     regLink.addEventListener('click', (e) => {
       e.preventDefault();
-      navigate('/register'); // 🧼 краще через navigate, ніж через window.location
+      navigate('/register');
     });
   }
 

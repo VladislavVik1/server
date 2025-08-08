@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import CrimeReport from './CrimeReport.js';
 import People from './People.js';
 import Spec from './Spec.js';
-import User from './User.js';
+import AuthUser from './AuthUser.js';
 
 /**
  * Функция подключения к MongoDB
@@ -22,7 +22,7 @@ export {
   CrimeReport,
   People,
   Spec,
-  User,
+  AuthUser,
 };
 
 export default {
@@ -30,5 +30,5 @@ export default {
   CrimeReport,
   People,
   Spec,
-  User,
+  AuthUser,
 };

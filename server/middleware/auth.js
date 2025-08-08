@@ -1,37 +1,49 @@
-// ./middleware/auth.js
+// middleware/auth.js
 import jwt from 'jsonwebtoken';
 
+const { JWT_SECRET = 'dev_secret' } = process.env;
+
 /**
- * Мидлвар для защиты маршрутов и проверки ролей.
- * @param {string[]} [allowedRoles] — массив разрешённых ролей (если не указан, проверяется только валидность токена)
+ * authenticate({ roles: ['admin', 'responder'], allowCookie: true })
+ * Кладёт в req.user: { id, email, role, iat, exp }
  */
-export function authenticate(allowedRoles = []) {
-  return (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Нет токена' });
+export const authenticate = (opts = {}) => (req, res, next) => {
+  try {
+    // Пропускаем preflight
+    if (req.method === 'OPTIONS') return next();
+
+    const header = (req.headers.authorization || '').trim();
+    const m = /^Bearer\s+(.+)$/i.exec(header);
+    let token = m ? m[1].trim() : null;
+
+    // опционально читаем из cookie
+    if (!token && opts.allowCookie && req.cookies?.token) {
+      token = req.cookies.token;
     }
 
-    const token = authHeader.split(' ')[1];
-    let payload;
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-      return res.status(401).json({ message: 'Неверный токен' });
-    }
+    if (!token) return res.status(401).json({ message: 'Нет токена' });
 
-    // Если указаны роли, проверяем, что роль пользователя в списке allowedRoles
-    if (allowedRoles.length && !allowedRoles.includes(payload.role)) {
-      return res.status(403).json({ message: 'Доступ запрещён' });
-    }
-
-    // Кладём данные пользователя в req.user
+    const payload = jwt.verify(token, JWT_SECRET);
     req.user = {
       id: payload.id,
       email: payload.email,
-      role: payload.role
+      role: payload.role,
+      iat: payload.iat,
+      exp: payload.exp,
     };
 
-    next();
-  };
-}
+    if (opts.roles?.length && !opts.roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Нет прав' });
+    }
+
+    return next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Неверный/протухший токен' });
+  }
+};
+
+/**
+ * Шорткат для проверки ролей:
+ * router.get('/admin', requireRoles('admin'), handler)
+ */
+export const requireRoles = (...roles) => authenticate({ roles });
