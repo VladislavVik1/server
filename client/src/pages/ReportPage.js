@@ -26,6 +26,13 @@ export default function ReportPage() {
   const [incidentName, setIncidentName] = useState('');
   const [incidentDetails, setIncidentDetails] = useState('');
 
+  // 🔹 Crime type dropdown
+  const [crimeType, setCrimeType] = useState('');
+  const crimeTypes = [
+    'Assault','Burglary','Robbery','Vandalism','Theft','Homicide',
+    'Arson','Fraud','Drug Offense','Domestic Violence','Cybercrime','Kidnapping'
+  ];
+
   // Вопросы
   const [suspectAware, setSuspectAware] = useState('');
   const [arrestsSoFar, setArrestsSoFar] = useState('');
@@ -64,7 +71,7 @@ export default function ReportPage() {
       reportDate, reportTime, reportMeridiem,
       incidentDate, incidentTime, incidentMeridiem,
       issuerFirst, issuerLast, locationText,
-      incidentName, incidentDetails,
+      crimeType, incidentName, incidentDetails,
       suspectAware, arrestsSoFar,
       suspectFirst, suspectLast, comments,
     };
@@ -87,7 +94,7 @@ export default function ReportPage() {
     if (!certify) { setAlert('Please certify the information is true and correct.'); return; }
 
     const form = new FormData();
-    form.append('type', incidentName || 'Incident');
+    form.append('type', crimeType || incidentName || 'Incident'); // 🔹 отправляем crimeType
     form.append('description', incidentDetails || comments || '');
     form.append('location', locationText);
     form.append('date', toISODateTime(incidentDate, incidentTime, incidentMeridiem));
@@ -112,12 +119,11 @@ export default function ReportPage() {
       setIncidentDate(''); setIncidentTime(''); setIncidentMeridiem('AM');
       setIssuerFirst(''); setIssuerLast('');
       setLocationText(''); setIncidentName(''); setIncidentDetails('');
+      setCrimeType('');
       setSuspectAware(''); setArrestsSoFar('');
       setSuspectFirst(''); setSuspectLast('');
       setComments(''); setFiles([]); setCertify(false);
 
-      // при желании редирект на карту:
-      // setTimeout(() => window.location.href = '/map', 800);
     } catch (err) {
       console.error(err?.response?.data || err.message);
       setAlert('Submit failed, try again.');
@@ -199,6 +205,21 @@ export default function ReportPage() {
               value={locationText}
               onChange={e=>setLocationText(e.target.value)}
             />
+          </div>
+
+          {/* Crime type dropdown */}
+          <div className="rf-field">
+            <label>Crime Type</label>
+            <select
+              id="crime-dropdown"
+              value={crimeType}
+              onChange={(e)=>setCrimeType(e.target.value)}
+            >
+              <option value="">-- Please choose an option --</option>
+              {crimeTypes.map((crime, i) => (
+                <option key={i} value={crime}>{crime}</option>
+              ))}
+            </select>
           </div>
 
           {/* Name & details */}
