@@ -1,70 +1,84 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect } from 'react';
+import api from '../../api';
 import '../../styles/Register.css';
+import { useNavigate } from 'react-router-dom';
 
-const Register = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('public');
-  const [error, setError] = useState('');
+export default function Register({ onLogin }) {
+  const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('/api/auth/register', {
-        email,
-        password,
-        role,
-      });console.log(res.data);
+  useEffect(() => {
+    // шаблон лежит в client/public/templates/Register.html
+    fetch('/templates/Register.html')
+      .then(res => {
+        if (!res.ok) throw new Error('Register.html not found: ' + res.status);
+        return res.text();
+      })
+      .then(html => {
+        const root = document.getElementById('root');
+        if (!root) throw new Error('#root not found');
+        root.innerHTML = html;
+        attachLogic();
+      })
+      .catch(err => {
+        console.error('[REGISTER] template load error', err);
+        alert('Не удалось загрузить шаблон регистрации');
+      });
+  }, []);
 
-      const { token } = res.data;
-      if (token) {
-        onLogin(token); // передаём токен в App.js
-      } else {
-        setError('Token not returned from server');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+  function attachLogic() {
+    const emailEl = document.getElementById('register-email');
+    const passEl  = document.getElementById('register-password');
+    const roleEl  = document.getElementById('register-role');
+    const errorEl = document.getElementById('register-error');
+    const btn     = document.getElementById('register-submit');
+
+    if (!emailEl || !passEl || !btn) {
+      console.warn('[REGISTER] elements not found');
+      return;
     }
-  };
 
-  return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h2 className="auth-title">CrimeBook</h2>
-        <h3>REGISTER</h3>
+    const submit = async (e) => {
+      e?.preventDefault?.();
+      if (errorEl) errorEl.textContent = '';
 
-        {error && <div className="auth-error">{error}</div>}
+      const email = (emailEl.value || '').trim();
+      const password = passEl.value || '';
+      const role = roleEl?.value || 'public';
 
-        <form onSubmit={handleRegister}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="public">Public User</option>
-            <option value="responder">Responder</option>
-          </select>
-          <button type="submit">Register</button>
-        </form>
+      if (!email || !password) {
+        if (errorEl) errorEl.textContent = 'Введите email и пароль';
+        return;
+      }
 
-        <p className="auth-switch">
-          Уже есть аккаунт? <Link to="/login">Войти</Link>
-        </p>
-      </div>
-    </div>
-  );
-};
+      btn.disabled = true;
+      try {
+        const res = await api.post('/api/auth/register', { email, password, role });
+        const data = res.data;
+        if (!data?.token) throw new Error(data?.message || 'Registration failed');
 
-export default Register;
+        // успех: сохраняем и делаем «жёсткий» переход
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
+        onLogin?.(data.token);
+
+        navigate('/dashboard', { replace: true });
+        setTimeout(() => window.location.reload(), 0);
+      } catch (err) {
+        const msg = err?.response?.data?.message || err?.message || 'Email занят или ошибка регистрации';
+        if (errorEl) errorEl.textContent = msg;
+        console.error('[REGISTER] submit error', err);
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    // Клик по кнопке
+    btn.addEventListener('click', submit);
+
+    // Enter в полях
+    emailEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(e); });
+    passEl.addEventListener('keydown',  (e) => { if (e.key === 'Enter') submit(e); });
+  }
+
+  return null;
+}
