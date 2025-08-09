@@ -1,0 +1,139 @@
+:root {
+  --page-bg: #096b79;
+  --card-bg: #fff;
+  --text: #111827;
+  --muted: #6b7280;
+  --soft: #f8fafc;
+  --soft-hover: #eef2f7;
+  --btn: #2563eb;
+  --danger-bg: #fff1f2;
+  --danger-text: #b91c1c;
+  --border: #e5e7eb;
+}
+
+.theme-dark {
+  --page-bg: #0b3440;
+  --card-bg: #0f172a;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --soft: #162033;
+  --soft-hover: #1e293b;
+  --btn: #3b82f6;
+  --danger-bg: #2b0e14;
+  --danger-text: #f87171;
+  --border: #334155;
+  color: white;
+}
+
+/* дальше — твои стили с заменой цветов на переменные */
+.pf2-wrap {
+  min-height: calc(100vh - 80px);
+  background: var(--page-bg);
+  display: grid;
+  grid-template-columns: 280px minmax(520px, 640px) 280px;
+  gap: 28px;
+  align-items: start;
+  justify-content: center;
+  padding: 40px 32px;
+}
+
+.pf2-card, .pf2-left, .pf2-modal, .pf2-settings {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+.pf2-left { padding: 16px; }
+.pf2-user { display:flex; gap:12px; align-items:center; padding:8px 8px 12px; }
+.pf2-user.sm { padding:0 }
+.pf2-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; background:#eee; }
+.pf2-name { font-weight:600; color: var(--text); }
+.pf2-sub { font-size:12px; color: var(--muted); }
+
+.pf2-menu { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.pf2-item, .pf2-item-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border-radius:12px; background: var(--soft);color: var(--text);
+  border:none; cursor:pointer; font:inherit;
+}
+.pf2-item:hover, .pf2-item-row:hover { background: var(--soft-hover); }
+.pf2-caret { opacity:.55; }
+.pf2-item.danger { background: var(--danger-bg); color: var(--danger-text); }
+
+.pf2-pop { display:flex; gap:6px; }
+.pf2-pop button {
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background: var(--card-bg);
+  cursor:pointer;
+  color: var(--text);
+}
+.pf2-pop button.active {
+  background: var(--text);
+  color: var(--card-bg);
+  border-color: var(--text);
+}
+
+.pf2-modal {
+  padding:18px;
+  max-width: 640px;
+  width: 100%;
+  justify-self: center;
+}
+.pf2-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.pf2-x { border:none; background:transparent; font-size:20px; cursor:pointer; opacity:.6; }
+
+.pf2-field {
+  display:grid; grid-template-columns: 180px 1fr;
+  align-items:center; border-top:1px solid var(--soft-hover); padding:16px 4px;
+}
+.pf2-field:first-of-type { border-top: none; }
+.pf2-field label { color: var(--muted); }
+.pf2-field input {
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  outline:none;
+  background: var(--card-bg);
+  color: var(--text);
+}
+.pf2-field input:focus { border-color:#60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.2); }
+
+.pf2-actions { display:flex; gap:10px; padding:16px 4px; }
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--btn);
+  color: #fff;
+  cursor: pointer;
+}
+.btn[disabled] { opacity:.6; cursor:not-allowed; }
+.btn.outline { background: var(--card-bg); color: var(--text); border:1px solid var(--border); }
+.btn.ghost { background: var(--soft-hover); color: var(--text); }
+
+.pf2-settings { padding:16px; }
+.pf2-title { font-weight:600; margin-bottom:8px; }
+.pf2-setting {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px;
+  background: var(--soft);
+  border-radius:12px;
+}
+.pf2-setting + .pf2-setting { margin-top:8px; }
+.pf2-setting select {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 10px;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+@media (max-width: 1100px) {
+  .pf2-wrap { grid-template-columns: 1fr; gap: 20px; }
+  .pf2-modal { justify-self: stretch; max-width: 720px; }
+}
