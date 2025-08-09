@@ -17,35 +17,34 @@ const LocationSchema = new Schema(
 
 const CrimeReportSchema = new Schema(
   {
-    // Основное
+
     type: { type: String, required: true },
     description: { type: String, default: '' },
-    comments: { type: String, default: '' }, // 👈 добавили
+    comments: { type: String, default: '' }, 
 
-    // Локация и дата инцидента
+ 
     location: { type: LocationSchema, default: () => ({}) },
-    date: { type: Date }, // когда случилось
+    date: { type: Date }, 
 
-    // Дата подачи отчёта (из формы)
-    reportIssuedAt: { type: Date, default: null }, // 👈 добавили
+  
+    reportIssuedAt: { type: Date, default: null },
+   
+    issuerFirst: { type: String, default: '' },  
+    issuerLast:  { type: String, default: '' },   
 
-    // Кем подан
-    issuerFirst: { type: String, default: '' },   // 👈 добавили
-    issuerLast:  { type: String, default: '' },   // 👈 добавили
 
-    // Вопросы
-    suspectAware:  { type: String, default: '' }, // 👈 добавили
-    arrestsSoFar:  { type: String, default: '' }, // 👈 добавили
+    suspectAware:  { type: String, default: '' }, 
+    arrestsSoFar:  { type: String, default: '' }, 
 
-    // Подозреваемый
-    suspectFirst: { type: String, default: '' },  // 👈 добавили
-    suspectLast:  { type: String, default: '' },  // 👈 добавили
 
-    // Медиа
+    suspectFirst: { type: String, default: '' },
+    suspectLast:  { type: String, default: '' }, 
+
+
     imageUrl: { type: String, default: null },
     attachments: [{ type: String }],
 
-    // Автор отчёта (динамический ref по роли)
+
     user: { type: Schema.Types.ObjectId, refPath: 'userModel' },
     userModel: {
       type: String,
@@ -53,7 +52,7 @@ const CrimeReportSchema = new Schema(
       default: 'People',
     },
 
-    // Статус
+
     status: {
       type: String,
       enum: ['pending', 'approved', 'denied', 'rejected', 'closed'],

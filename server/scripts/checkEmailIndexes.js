@@ -17,7 +17,7 @@ async function run() {
   for (const collName of collections) {
     console.log(`\n=== ${collName} ===`);
 
-    // Индексы
+
     const indexes = await db.collection(collName).indexes();
     console.log('Indexes:');
     console.table(indexes.map(i => ({
@@ -26,7 +26,7 @@ async function run() {
       unique: !!i.unique
     })));
 
-    // Примеры email'ов
+
     const docs = await db.collection(collName)
       .find({}, { projection: { email: 1, email_lc: 1 } })
       .limit(10)

@@ -25,7 +25,7 @@
   color: white;
 }
 
-/* Сетка: всегда 3 колонки */
+
 .pf2-wrap {
   min-height: calc(100vh - 80px);
   background: var(--page-bg);
@@ -43,10 +43,10 @@
   box-shadow: 0 8px 24px rgba(0,0,0,.08);
 }
 
-/* левая колонка */
+
 .pf2-left {
   padding: 16px;
-  position: relative; /* нужно для абсолютного позиционирования .pf2-admin */
+  position: relative; 
 }
 .pf2-user { display:flex; gap:12px; align-items:center; padding:8px 8px 12px; }
 .pf2-user.sm { padding:0 }
@@ -79,7 +79,7 @@
   border-color: var(--text);
 }
 
-/* центр (форма) */
+
 .pf2-center { align-self: start; }
 .pf2-modal { padding:18px; max-width: 640px; width: 100%; justify-self: center; }
 .pf2-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
@@ -110,7 +110,7 @@
 .btn.outline { background: var(--card-bg); color: var(--text); border:1px solid var(--border); }
 .btn.ghost { background: var(--soft-hover); color: var(--text); }
 
-/* правая колонка */
+
 .pf2-right { align-self: start; }
 .pf2-settings { padding:16px; }
 .pf2-title { font-weight:600; margin-bottom:8px; color: var(--text); }
@@ -127,7 +127,7 @@
   color: var(--text);
 }
 
-/* видимость без сдвигов макета */
+
 .is-hidden {
   visibility: hidden;
   opacity: 0;
@@ -141,7 +141,7 @@
   transition: opacity .18s ease, transform .18s ease, visibility 0s linear;
 }
 
-/* === MODERATOR: отдельное окно под меню === */
+
 .pf2-admin {
   position: absolute;
   top: calc(100% + 12px);
@@ -156,11 +156,11 @@
 
 .pf2-admin-note { color: var(--muted); margin-bottom: 8px; }
 
-/* таблица модератора */
+
 .pf2-table { display: grid; gap: 8px; }
 .pf2-table-head, .pf2-table-row {
   display: grid;
-  grid-template-columns: 1.8fr 1.4fr 1fr 1.6fr 1.8fr; /* чуть шире колонки */
+  grid-template-columns: 1.8fr 1.4fr 1fr 1.6fr 1.8fr; 
   gap: 8px;
   align-items: center;
   padding: 10px 12px;
@@ -182,13 +182,11 @@
 .btn.sm { padding: 8px 10px; border-radius: 8px; }
 .btn.danger { background:#b91c1c; color:#fff; }
 
-/* адаптив */
 @media (max-width: 1100px) {
   .pf2-wrap { grid-template-columns: 1fr; gap: 20px; }
   .pf2-center, .pf2-right { align-self: stretch; }
   .pf2-modal { justify-self: stretch; max-width: 720px; }
 
-  /* на узких — окно модератора становится обычным блоком под карточкой */
   .pf2-admin {
     position: static;
     width: 100%;

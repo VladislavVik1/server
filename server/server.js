@@ -19,7 +19,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// CORS
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? process.env.CLIENT_URL
@@ -29,19 +29,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ гарантируем директорию uploads (иначе могут быть ENOENT)
+
 const uploadsDir = path.join(__dirname, 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
-// --- РЕГИСТРЫ МАРШРУТОВ ---
+
 app.use('/api/auth', authRoutes);
 app.use('/api', testRoutes);
 app.use('/api', reportRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api', mapRoutes);
 app.use('/api/admin', adminRoutes);
-// Статика React + шаблоны
+
 const buildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(buildPath)) {
   app.use(express.static(buildPath));
@@ -54,9 +54,8 @@ if (fs.existsSync(buildPath)) {
   );
 }
 
-// ❌ убрали автосоздание админа — админ уже есть в БД
 
-// Подключаемся к MongoDB и стартуем сервер
+
 connectDB(process.env.MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB connected');

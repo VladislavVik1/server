@@ -1,23 +1,20 @@
-// ./controllers/heatmapUtils.js
+
 import CrimeReport from '../models/CrimeReport.js';
 import mongoose from 'mongoose';
 
-/**
- * Вычислить точки для тепловой карты за последние 30 дней.
- * Возвращает массив объектов { lat, lng, intensity }.
- */
+
 export const calculateHeatmap = async () => {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // Находим все отчёты за последние 30 дней с координатами
+
   const crimes = await CrimeReport.find({
     createdAt: { $gte: thirtyDaysAgo },
     'location.coordinates.lat': { $exists: true },
     'location.coordinates.lng': { $exists: true }
   }).select('location.coordinates');
 
-  // Группируем по сетке
+
   const GRID_SIZE = 0.01;
   const heatmap = {};
 
@@ -29,20 +26,17 @@ export const calculateHeatmap = async () => {
     heatmap[key] = (heatmap[key] || 0) + 1;
   });
 
-  // Преобразуем в массив { lat, lng, intensity }
+
   return Object.entries(heatmap).map(([key, count]) => {
     const [lat, lng] = key.split(',').map(parseFloat);
-    // нормируем интенсивность до [0,1], пример:  max 10 отчётов в клетке
+
     return { lat, lng, intensity: Math.min(count / 10, 1) };
   });
 };
 
-/**
- * Получить статистику распределения по типам преступлений.
- * Возвращает объект { typeDistribution: [{ type, count }, ...] }.
- */
+
 export const getCrimeStats = async () => {
-  // Используем aggregation pipeline для группировки
+
   const results = await CrimeReport.aggregate([
     { 
       $group: {

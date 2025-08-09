@@ -1,4 +1,4 @@
-// server/routes/reportRoutes.js
+
 import express from 'express';
 import {
   createReport,
@@ -13,7 +13,7 @@ import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
-// Создание отчёта — public и admin
+
 router.post(
   '/reports',
   authenticate(['public', 'admin']),
@@ -23,12 +23,12 @@ router.post(
       const report = await createReport(req);
       res.status(201).json(report);
     } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+      res.status(500).json({ message: 'Server Error', error: err.message });
     }
   }
 );
 
-// Обновление статуса — responder и admin
+
 router.put(
   '/reports/:id/status',
   authenticate(['responder', 'admin']),
@@ -37,12 +37,12 @@ router.put(
       const updated = await updateStatus(req);
       res.json(updated);
     } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+      res.status(500).json({ message: 'Server Error', error: err.message });
     }
   }
 );
 
-// Все отчёты — responder и admin
+
 router.get(
   '/reports',
   authenticate(['responder', 'admin']),
@@ -51,12 +51,12 @@ router.get(
       const reports = await getAllReports();
       res.json(reports);
     } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+      res.status(500).json({ message: 'Server Error', error: err.message });
     }
   }
 );
 
-// Только свои — public
+
 router.get(
   '/reports/mine',
   authenticate(['public']),
@@ -65,19 +65,19 @@ router.get(
       const reports = await getMyReports(req.user.id);
       res.json(reports);
     } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+      res.status(500).json({ message: 'Server Error', error: err.message });
     }
   }
 );
 
-// 🔹 Листинг для модератора (ПЕРЕД :id!)
+
 router.get(
   '/reports/moderation',
   authenticate(['responder', 'admin']),
   listForModeration
 );
 
-// Алиас на pending
+
 router.get(
   '/reports/pending',
   authenticate(['responder', 'admin']),
@@ -87,15 +87,15 @@ router.get(
   }
 );
 
-// Один отчёт по ID — все роли
+
 router.get(
   '/reports/:id',
   authenticate(['public', 'responder', 'admin']),
   async (req, res) => {
     try {
-      await getReportById(req, res); // контроллер сам шлёт res
+      await getReportById(req, res); //
     } catch (err) {
-      res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+      res.status(500).json({ message: 'Server Error', error: err.message });
     }
   }
 );

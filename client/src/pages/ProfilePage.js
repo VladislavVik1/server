@@ -10,10 +10,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
 
-  // 'none' | 'profile' | 'settings' | 'admin'
   const [openPanel, setOpenPanel] = useState('none');
 
-  // admin data
+
   const [pending, setPending] = useState([]);
   const [loadingPending, setLoadingPending] = useState(false);
   const [adminBusy, setAdminBusy] = useState(false);
@@ -100,7 +99,7 @@ export default function ProfilePage() {
     window.location.href = '/login';
   };
 
-  // ===== Admin panel logic =====
+
   const fetchPending = async () => {
     if (loadingPending) return;
     setLoadingPending(true);
@@ -155,7 +154,7 @@ export default function ProfilePage() {
     if (openPanel === 'admin' && me?.role === 'admin') {
       fetchPending();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [openPanel, me?.role]);
 
   if (!me) {
@@ -168,7 +167,7 @@ export default function ProfilePage() {
 
   return (
     <div className="pf2-wrap">
-      {/* Левая колонка — всегда видна */}
+
       <div className="pf2-left">
         <div className="pf2-user">
           <img className="pf2-avatar" src={avatarSrc || '/default-avatar.png'} alt="" />
@@ -219,7 +218,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* === Admin (Moderator) UNDER LEFT MENU === */}
+
         {me.role === 'admin' && openPanel === 'admin' && (
           <div className="pf2-admin">
             <div className="pf2-modal-head">
@@ -296,7 +295,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Правая — только Settings */}
+
       <div className="pf2-right">
         <div className={`pf2-settings ${openPanel === 'settings' ? 'is-open' : 'is-hidden'}`}>
           <div className="pf2-modal-head">

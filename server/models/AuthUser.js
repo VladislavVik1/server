@@ -4,15 +4,14 @@ const { Schema, model } = mongoose;
 
 const AuthUserSchema = new Schema(
   {
-    email: { type: String, required: true, trim: true },            // храните как вводит пользователь
-    email_lc: { type: String, required: true, index: true },        // для уникального индекса email_lc_1
+    email: { type: String, required: true, trim: true },         
     password: { type: String, required: true },
     role: { type: String, enum: ['admin', 'public', 'responder'], required: true }
   },
   { timestamps: true }
 );
 
-// Автоматически проставляем email_lc
+
 AuthUserSchema.pre('validate', function (next) {
   if (this.email) {
     this.email_lc = String(this.email).trim().toLowerCase();

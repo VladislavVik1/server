@@ -20,7 +20,7 @@ export default function App() {
     if (token) {
       setAuthToken(token);
 
-      // Загружаем роль пользователя
+
       api.get('/api/auth/profile')
         .then(res => setRole(res.data.role))
         .catch(() => setRole(''));
@@ -46,11 +46,11 @@ export default function App() {
       {token && <Sidebar onLogout={handleLogout} role={role} />}
       <main className="content">
         <Routes>
-          {/* Публичные маршруты */}
+
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
 
-          {/* Приватные маршруты */}
+
           {token ? (
             <>
               <Route path="/dashboard" element={<DashboardPage />} />

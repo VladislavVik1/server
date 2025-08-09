@@ -12,7 +12,6 @@ export default function DashboardPage() {
     last7days: []
   });
 
-  // 👇 состояние модалки
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [fetching, setFetching] = useState(false);
@@ -34,7 +33,7 @@ export default function DashboardPage() {
     return () => { mounted = false; };
   }, []);
 
-  // 👇 загрузка полного отчёта по клику
+
   const openDetails = async (id) => {
     try {
       setFetching(true);
@@ -119,7 +118,7 @@ export default function DashboardPage() {
                 <th>Type</th>
                 <th>Status</th>
                 <th>Address</th>
-                <th></th> {/* кнопка View */}
+                <th></th> 
               </tr>
             </thead>
             <tbody>
@@ -145,7 +144,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* модалка */}
+
       {modalOpen && (
         <ReportModal report={selectedReport} onClose={() => setModalOpen(false)} />
       )}

@@ -1,4 +1,4 @@
-// server/controllers/dashboardController.js
+
 import CrimeReport from '../models/CrimeReport.js';
 import mongoose from 'mongoose';
 
@@ -9,7 +9,6 @@ export async function getDashboardSummary(req, res) {
       ? {}
       : { user: new mongoose.Types.ObjectId(user.id) };
 
-    // 1) Общие числа по статусам
     const statusAgg = await CrimeReport.aggregate([
       { $match: match },
       { $group: { _id: '$status', count: { $sum: 1 } } }
@@ -19,14 +18,14 @@ export async function getDashboardSummary(req, res) {
     counters.total = statusAgg.reduce((a, s) => a + s.count, 0);
     statusAgg.forEach(s => { counters[s._id] = s.count; });
 
-    // 2) Последние 5 отчётов
+
     const recent = await CrimeReport
       .find(match)
       .sort({ createdAt: -1 })
       .limit(5)
       .select('type description status createdAt location.address');
 
-    // 3) Топ-5 типов
+ 
     const typeAgg = await CrimeReport.aggregate([
       { $match: match },
       { $group: { _id: '$type', count: { $sum: 1 } } },
@@ -34,9 +33,8 @@ export async function getDashboardSummary(req, res) {
       { $limit: 5 }
     ]);
 
-    // 4) Последние 7 дней по дням
     const since = new Date();
-    since.setDate(since.getDate() - 6); // сегодня и 6 пред. дней
+    since.setDate(since.getDate() - 6);
     const last7Agg = await CrimeReport.aggregate([
       { $match: { ...match, createdAt: { $gte: since } } },
       {
@@ -52,7 +50,6 @@ export async function getDashboardSummary(req, res) {
       { $sort: { '_id.y': 1, '_id.m': 1, '_id.d': 1 } }
     ]);
 
-    // нормализуем до 7 точек (0 для пропущенных дней)
     const byDay = [];
     for (let i = 0; i < 7; i++) {
       const dt = new Date();

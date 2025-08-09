@@ -10,10 +10,7 @@ const router = express.Router();
 
 const isId = (v) => mongoose.Types.ObjectId.isValid(String(v));
 
-/**
- * GET /api/admin/responders/pending
- * Список пользователей, у которых Spec со статусом 'pending'
- */
+
 router.get('/responders/pending', authenticate(), authorize('admin'), async (_req, res) => {
   try {
     const specs = await Spec.find({ status: 'pending' })
@@ -33,7 +30,7 @@ router.get('/responders/pending', authenticate(), authorize('admin'), async (_re
       userId: s.user,
       email: map[String(s.user)]?.email || s.email,
       name: s.name || '',
-      status: s.status, // pending
+      status: s.status, 
       role: map[String(s.user)]?.role || 'public',
       requestedAt: s.createdAt,
     }));
@@ -45,10 +42,7 @@ router.get('/responders/pending', authenticate(), authorize('admin'), async (_re
   }
 });
 
-/**
- * POST /api/admin/responders/:userId/approve
- * Разрешить: Spec -> active, AuthUser.role -> responder (атомарно)
- */
+
 router.post('/responders/:userId/approve', authenticate(), authorize('admin'), async (req, res) => {
   const { userId } = req.params;
   if (!isId(userId)) return res.status(400).json({ message: 'Invalid userId' });
@@ -63,7 +57,7 @@ router.post('/responders/:userId/approve', authenticate(), authorize('admin'), a
         return res.status(409).json({ message: 'Already active' });
       }
       if (spec.status === 'suspended') {
-        // позволяем возвращать с suspended в active через approve
+
       }
 
       const user = await AuthUser.findById(userId).session(session);
@@ -85,15 +79,12 @@ router.post('/responders/:userId/approve', authenticate(), authorize('admin'), a
   }
 });
 
-/**
- * POST /api/admin/responders/:userId/demote
- * Отстранить: Spec -> suspended (если есть), AuthUser.role -> public (атомарно)
- */
+
 router.post('/responders/:userId/demote', authenticate(), authorize('admin'), async (req, res) => {
   const { userId } = req.params;
   if (!isId(userId)) return res.status(400).json({ message: 'Invalid userId' });
 
-  // (не даём админам разжаловать самих себя, если хочется — снимите проверку)
+
   if (String(req.user?.id) === String(userId)) {
     return res.status(400).json({ message: 'You cannot demote yourself' });
   }
@@ -106,7 +97,7 @@ router.post('/responders/:userId/demote', authenticate(), authorize('admin'), as
 
       const spec = await Spec.findOne({ user: userId }).session(session);
       if (spec) {
-        // если уже suspended — вернём 409 чтобы показать, что ничего не изменилось
+
         if (spec.status === 'suspended') {
           return res.status(409).json({ message: 'Already suspended', role: user.role, status: spec.status });
         }
@@ -114,7 +105,6 @@ router.post('/responders/:userId/demote', authenticate(), authorize('admin'), as
         await spec.save({ session });
       }
 
-      // если уже public — можно вернуть 409, но чаще UX-дружелюбно вернуть 200 с no-op
       user.role = 'public';
       await user.save({ session });
 
@@ -128,15 +118,12 @@ router.post('/responders/:userId/demote', authenticate(), authorize('admin'), as
   }
 });
 
-/**
- * DELETE /api/admin/users/:userId
- * Полное удаление пользователя и обоих профилей (атомарно)
- */
+
 router.delete('/users/:userId', authenticate(), authorize('admin'), async (req, res) => {
   const { userId } = req.params;
   if (!isId(userId)) return res.status(400).json({ message: 'Invalid userId' });
 
-  // (по желанию) не позволять удалять свою админ-учётку
+
   if (String(req.user?.id) === String(userId)) {
     return res.status(400).json({ message: 'You cannot delete yourself' });
   }

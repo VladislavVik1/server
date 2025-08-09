@@ -27,7 +27,7 @@ export default function ModerationPage() {
     });
     const list = Array.isArray(res.data) ? res.data : [];
 
-    // простая логика "уведомления": если появились новые ID
+
     const newIds = new Set(list.map(x => x._id));
     let added = 0;
     for (const id of newIds) if (!prevIdsRef.current.has(id)) added++;
@@ -50,12 +50,12 @@ export default function ModerationPage() {
     loadList().catch(console.error);
     const t = setInterval(() => loadList().catch(console.error), 12000);
     return () => clearInterval(t);
-    // eslint-disable-next-line
+
   }, []);
 
   useEffect(() => {
     loadList(filter).catch(console.error);
-    // eslint-disable-next-line
+
   }, [filter]);
 
   const handleChanged = (id, status) => {

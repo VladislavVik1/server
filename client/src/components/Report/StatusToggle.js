@@ -10,7 +10,7 @@ export default function StatusToggle({ report, onChanged }) {
     setLoading(true);
     try {
       await api.put(`/api/reports/${report._id}/status`, { status });
-      onChanged?.(report._id, status); // <-- передаём и id, и статус
+      onChanged?.(report._id, status); 
     } catch (e) {
       setErr(e?.response?.data?.message || 'Ошибка');
     } finally {

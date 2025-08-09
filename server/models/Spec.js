@@ -11,13 +11,13 @@ const SpecSchema = new Schema(
     password: { type: String, required: true },
     role: { type: String, default: 'responder' },
 
-    // ПОЛЯ ПРОФИЛЯ
+
     name: { type: String, trim: true },
     phone: { type: String, trim: true },
     location: { type: String, trim: true },
     avatarUrl: { type: String, trim: true },
     status: { type: String, enum: ['pending', 'active', 'suspended'], default: 'pending' },
-    // Настройки
+
     theme: { type: String, enum: ['light', 'dark'], default: 'light' },
     language: { type: String, default: 'en' },
     notifications: { type: Boolean, default: true },

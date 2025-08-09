@@ -5,50 +5,50 @@ import '../styles/ReportForm.css';
 export default function ReportPage() {
   const [alert, setAlert] = useState('');
 
-  // Report (когда подают)
+
   const [reportDate, setReportDate] = useState('');
   const [reportTime, setReportTime] = useState('');
   const [reportMeridiem, setReportMeridiem] = useState('AM');
 
-  // Incident (когда случилось)
+
   const [incidentDate, setIncidentDate] = useState('');
   const [incidentTime, setIncidentTime] = useState('');
   const [incidentMeridiem, setIncidentMeridiem] = useState('AM');
 
-  // Кем подан
+
   const [issuerFirst, setIssuerFirst] = useState('');
   const [issuerLast, setIssuerLast] = useState('');
 
-  // Локация
+
   const [locationText, setLocationText] = useState('');
 
-  // Инцидент
+
   const [incidentName, setIncidentName] = useState('');
   const [incidentDetails, setIncidentDetails] = useState('');
 
-  // 🔹 Crime type dropdown
+
   const [crimeType, setCrimeType] = useState('');
   const crimeTypes = [
     'Assault','Burglary','Robbery','Vandalism','Theft','Homicide',
     'Arson','Fraud','Drug Offense','Domestic Violence','Cybercrime','Kidnapping'
   ];
 
-  // Вопросы
+
   const [suspectAware, setSuspectAware] = useState('');
   const [arrestsSoFar, setArrestsSoFar] = useState('');
 
-  // Подозреваемый
+  
   const [suspectFirst, setSuspectFirst] = useState('');
   const [suspectLast, setSuspectLast] = useState('');
 
-  // Комментарии
+
   const [comments, setComments] = useState('');
 
-  // Файлы
+
   const [files, setFiles] = useState([]);
   const dropRef = useRef(null);
 
-  // Подтверждение
+
   const [certify, setCertify] = useState(false);
 
   const onFiles = (fileList) => {
@@ -114,7 +114,7 @@ export default function ReportPage() {
       await api.post('/api/reports', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       setAlert('Report submitted ✔');
 
-      // reset
+     
       setReportDate(''); setReportTime(''); setReportMeridiem('AM');
       setIncidentDate(''); setIncidentTime(''); setIncidentMeridiem('AM');
       setIssuerFirst(''); setIssuerLast('');
@@ -143,7 +143,7 @@ export default function ReportPage() {
         {alert && <div className="rf-alert">{alert}</div>}
 
         <div className="rf-grid">
-          {/* Report date/time */}
+    
           <div className="rf-field">
             <label>Report date</label>
             <input type="date" value={reportDate} onChange={e=>setReportDate(e.target.value)} />
@@ -158,7 +158,7 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* Incident date/time */}
+      
           <div className="rf-field">
             <label>Date when incident occurred</label>
             <input type="date" value={incidentDate} onChange={e=>setIncidentDate(e.target.value)} />
@@ -173,7 +173,7 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* Incident report issued by */}
+    
           <div className="rf-group">
             <label>Incident report issued by</label>
             <div className="rf-row-2">
@@ -188,7 +188,7 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* Location */}
+    
           <div className="rf-field">
             <label>Incident Location (provide specific details)</label>
             <textarea
@@ -207,7 +207,7 @@ export default function ReportPage() {
             />
           </div>
 
-          {/* Crime type dropdown */}
+  
           <div className="rf-field">
             <label>Crime Type</label>
             <select
@@ -222,7 +222,6 @@ export default function ReportPage() {
             </select>
           </div>
 
-          {/* Name & details */}
           <div className="rf-field">
             <label>Name of Incident</label>
             <textarea value={incidentName} onChange={e=>setIncidentName(e.target.value)} />
@@ -233,7 +232,7 @@ export default function ReportPage() {
             <textarea value={incidentDetails} onChange={e=>setIncidentDetails(e.target.value)} />
           </div>
 
-          {/* Questions */}
+      
           <div className="rf-field">
             <label>Was the suspect aware or have any charges been set?</label>
             <textarea value={suspectAware} onChange={e=>setSuspectAware(e.target.value)} />
@@ -244,7 +243,7 @@ export default function ReportPage() {
             <textarea value={arrestsSoFar} onChange={e=>setArrestsSoFar(e.target.value)} />
           </div>
 
-          {/* Files */}
+   
           <div className="rf-field">
             <label>Upload related files</label>
             <div
@@ -264,7 +263,7 @@ export default function ReportPage() {
             )}
           </div>
 
-          {/* Suspect name */}
+
           <div className="rf-group">
             <label>Suspect’s Full Name (If Known)</label>
             <div className="rf-row-2">
@@ -279,13 +278,13 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* Comments */}
+
           <div className="rf-field">
             <label>Further Comments</label>
             <textarea value={comments} onChange={e=>setComments(e.target.value)} />
           </div>
 
-          {/* Confirm */}
+
           <div className="rf-confirm">
             <label className="rf-check">
               <input type="checkbox" checked={certify} onChange={e=>setCertify(e.target.checked)} />
@@ -293,7 +292,6 @@ export default function ReportPage() {
             </label>
           </div>
 
-          {/* Actions */}
           <div className="rf-actions">
             <button type="button" className="btn ghost" onClick={handleSaveLocal}>Save</button>
             <button type="submit" className="btn primary">Submit</button>

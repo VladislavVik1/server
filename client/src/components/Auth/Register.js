@@ -7,7 +7,6 @@ export default function Register({ onLogin }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // шаблон лежит в client/public/templates/Register.html
     fetch('/templates/Register.html')
       .then(res => {
         if (!res.ok) throw new Error('Register.html not found: ' + res.status);
@@ -21,7 +20,7 @@ export default function Register({ onLogin }) {
       })
       .catch(err => {
         console.error('[REGISTER] template load error', err);
-        alert('Не удалось загрузить шаблон регистрации');
+        alert('Failed to load registration template');
       });
   }, []);
 
@@ -46,7 +45,7 @@ export default function Register({ onLogin }) {
       const role = roleEl?.value || 'public';
 
       if (!email || !password) {
-        if (errorEl) errorEl.textContent = 'Введите email и пароль';
+        if (errorEl) errorEl.textContent = 'please fill in all fields';
         return;
       }
 
@@ -56,7 +55,6 @@ export default function Register({ onLogin }) {
         const data = res.data;
         if (!data?.token) throw new Error(data?.message || 'Registration failed');
 
-        // успех: сохраняем и делаем «жёсткий» переход
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role);
         onLogin?.(data.token);
@@ -64,7 +62,7 @@ export default function Register({ onLogin }) {
         navigate('/dashboard', { replace: true });
         setTimeout(() => window.location.reload(), 0);
       } catch (err) {
-        const msg = err?.response?.data?.message || err?.message || 'Email занят или ошибка регистрации';
+        const msg = err?.response?.data?.message || err?.message || 'Email is already used'; 
         if (errorEl) errorEl.textContent = msg;
         console.error('[REGISTER] submit error', err);
       } finally {
@@ -72,10 +70,10 @@ export default function Register({ onLogin }) {
       }
     };
 
-    // Клик по кнопке
+
     btn.addEventListener('click', submit);
 
-    // Enter в полях
+
     emailEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(e); });
     passEl.addEventListener('keydown',  (e) => { if (e.key === 'Enter') submit(e); });
   }

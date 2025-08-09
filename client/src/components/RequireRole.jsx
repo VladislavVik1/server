@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import api from '../api';
 
 export default function RequireRole({ allow = [], children }) {
-  const [role, setRole] = useState(null);   // null = загрузка, '' = ошибка/гость
+  const [role, setRole] = useState(null);  
 
   useEffect(() => {
     let mounted = true;

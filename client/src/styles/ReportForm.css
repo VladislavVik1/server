@@ -36,7 +36,7 @@
     color: #000;
   }
   
-  /* Красная плашка */
+
   .rf-banner {
     max-width: 540px;
     margin: 0 auto 12px;
@@ -48,7 +48,7 @@
     border-radius: 8px;
   }
   
-  /* Карточка формы */
+
   .rf-card {
     max-width: 540px;
     margin: 0 auto;
@@ -59,7 +59,7 @@
     padding: 14px;
   }
   
-  /* Сообщения */
+
   .rf-alert {
     background: #fff7e6;
     border: 1px solid #ffe0a3;
@@ -69,14 +69,14 @@
     margin-bottom: 8px;
   }
   
-  /* Сетка формы */
+ 
   .rf-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
   }
   
-  /* Группа полей */
+  
   .rf-field {
     display: flex;
     flex-direction: column;
@@ -89,7 +89,7 @@
     font-weight: 700;
   }
   
-  /* Поля ввода */
+
   .rf-field input[type="text"],
   .rf-field input[type="date"],
   .rf-field input[type="time"],
@@ -109,20 +109,19 @@
     background: #fff;
     color: var(--rf-text);
   }
-  
-  /* У date/time место под иконку */
+
   .rf-field input[type="date"],
   .rf-field input[type="time"] {
     padding-right: 40px;
   }
   
-  /* textarea фиксированной высоты */
+
   .rf-field textarea {
     height: 96px;
     resize: none;
   }
   
-  /* Группы имён (лейбл + 2 поля) */
+
   .rf-group {
     margin-bottom: 12px;
   }
@@ -151,8 +150,7 @@
     font-size: 12px;
     color: var(--rf-muted);
   }
-  
-  /* Drag&drop */
+
   .rf-drop {
     position: relative;
     border: 2px dashed #C9D4F1;
@@ -199,7 +197,7 @@
     font-size: 12px;
   }
   
-  /* Чекбокс */
+
   .rf-confirm {
     margin-top: 6px;
   }
@@ -214,7 +212,7 @@
     height: 16px;
   }
   
-  /* Кнопки */
+ 
   .rf-actions {
     display: flex;
     gap: 12px;
@@ -240,7 +238,7 @@
     border: 1px solid var(--rf-border);
   }
   
-  /* На десктопе — всегда 1 колонка */
+
   @media (min-width: 860px) {
     .rf-grid {
       grid-template-columns: 1fr;

@@ -13,10 +13,10 @@ export const register = async (req, res) => {
     const role = String(req.body.role || '').trim();
 
     if (!emailRaw || !password || !role) {
-      return res.status(400).json({ message: 'email, password и role обязательны' });
+      return res.status(400).json({ message: 'email, password, role are required' });
     }
     if (!['public', 'responder', 'admin'].includes(role)) {
-      return res.status(400).json({ message: 'Недопустимая роль' });
+      return res.status(400).json({ message: 'Wrong role' });
     }
 
     const emailLC = emailRaw.toLowerCase();
@@ -25,7 +25,7 @@ export const register = async (req, res) => {
     const existsPeople = await People.findOne({ email: emailLC });
     const existsSpec = await Spec.findOne({ email: emailLC });
     if (existsAuth || existsPeople || existsSpec) {
-      return res.status(409).json({ message: 'Email уже занят' });
+      return res.status(409).json({ message: 'Email already used' });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -42,14 +42,14 @@ export const register = async (req, res) => {
         user: auth._id,
         email: emailLC,
         role,
-        password: hash // убери, если пароль в People не нужен
+        password: hash 
       });
     } else if (role === 'responder') {
       profileDoc = await Spec.create({
         user: auth._id,
         email: emailLC,
         role,
-        password: hash // убери, если пароль в Spec не нужен
+        password: hash 
       });
     }
 
@@ -62,9 +62,9 @@ export const register = async (req, res) => {
     return res.status(201).json({ token, role: auth.role, userId: auth._id, profileId: profileDoc?._id || null });
   } catch (err) {
     if (err?.code === 11000) {
-      return res.status(409).json({ message: 'Email уже занят' });
+      return res.status(409).json({ message: 'Email already used' });
     }
-    return res.status(500).json({ message: 'Ошибка регистрации', error: err.message });
+    return res.status(500).json({ message: 'Register Error', error: err.message });
   }
 };
 
@@ -74,10 +74,10 @@ export const login = async (req, res) => {
     const password = String(req.body.password || '');
 
     const auth = await AuthUser.findOne({ email: emailRaw });
-    if (!auth) return res.status(401).json({ message: 'Неверные учетные данные' });
+    if (!auth) return res.status(401).json({ message: 'Wrong user data' });
 
     const ok = await bcrypt.compare(password, auth.password);
-    if (!ok) return res.status(401).json({ message: 'Неверные учетные данные' });
+    if (!ok) return res.status(401).json({ message: 'Wrong user data' });
 
     const token = jwt.sign(
       { id: auth._id, email: auth.email, role: auth.role },
@@ -86,7 +86,7 @@ export const login = async (req, res) => {
     );
     return res.json({ token, role: auth.role });
   } catch (err) {
-    return res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+    return res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
 
@@ -117,6 +117,6 @@ export const getProfile = async (req, res) => {
       updatedAt: auth.updatedAt
     });
   } catch (err) {
-    return res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+    return res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
