@@ -25,7 +25,7 @@
   color: white;
 }
 
-/* Сетка: всегда 3 колонки, ничего не прыгает */
+/* Сетка: всегда 3 колонки */
 .pf2-wrap {
   min-height: calc(100vh - 80px);
   background: var(--page-bg);
@@ -44,7 +44,10 @@
 }
 
 /* левая колонка */
-.pf2-left { padding: 16px; }
+.pf2-left {
+  padding: 16px;
+  position: relative; /* нужно для абсолютного позиционирования .pf2-admin */
+}
 .pf2-user { display:flex; gap:12px; align-items:center; padding:8px 8px 12px; }
 .pf2-user.sm { padding:0 }
 .pf2-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; background:#eee; }
@@ -138,9 +141,61 @@
   transition: opacity .18s ease, transform .18s ease, visibility 0s linear;
 }
 
+/* === MODERATOR: отдельное окно под меню === */
+.pf2-admin {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  z-index: 10;
+
+  padding: 16px;
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+
+.pf2-admin-note { color: var(--muted); margin-bottom: 8px; }
+
+/* таблица модератора */
+.pf2-table { display: grid; gap: 8px; }
+.pf2-table-head, .pf2-table-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1.4fr 1fr 1.6fr 1.8fr; /* чуть шире колонки */
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--soft);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.pf2-table-head { font-weight: 600; background: var(--soft-hover); color: var(--text); }
+.pf2-table-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.pf2-empty { padding: 10px 12px; color: var(--muted); }
+.pf2-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--soft-hover);
+  color: var(--text);
+  font-size: 12px;
+}
+.btn.sm { padding: 8px 10px; border-radius: 8px; }
+.btn.danger { background:#b91c1c; color:#fff; }
+
 /* адаптив */
 @media (max-width: 1100px) {
   .pf2-wrap { grid-template-columns: 1fr; gap: 20px; }
   .pf2-center, .pf2-right { align-self: stretch; }
   .pf2-modal { justify-self: stretch; max-width: 720px; }
+
+  /* на узких — окно модератора становится обычным блоком под карточкой */
+  .pf2-admin {
+    position: static;
+    width: 100%;
+    margin-top: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  }
+  .pf2-table-head, .pf2-table-row {
+    grid-template-columns: 1.4fr 1fr .9fr 1.2fr 1.4fr;
+  }
 }

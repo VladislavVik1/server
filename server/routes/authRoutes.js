@@ -22,63 +22,71 @@ const profileModelByRole = (role) => (role === 'responder' ? Spec : People);
  * POST /api/auth/register
  * Body: { email, password, role: 'public' | 'responder' | 'admin' }
  */
+/**
+ * POST /api/auth/register
+ * Body: { email, password, role: 'public' | 'responder' | 'admin' }
+ */
 router.post('/register', async (req, res) => {
   try {
     const emailRaw = String(req.body.email || '').trim();
     const password = String(req.body.password || '');
-    const role = String(req.body.role || '').trim();
+    const requestedRole = String(req.body.role || '').trim(); // <- что выбрал пользователь
 
-    if (!emailRaw || !password || !role) {
+    if (!emailRaw || !password || !requestedRole) {
       return res.status(400).json({ message: 'email, password и role обязательны' });
     }
-    if (!['public', 'responder', 'admin'].includes(role)) {
+    if (!['public', 'responder', 'admin'].includes(requestedRole)) {
       return res.status(400).json({ message: 'Недопустимая роль' });
     }
 
-    // TODO (опционально): ограничить создание admin
-    // if (role === 'admin' && req.headers['x-admin-token'] !== process.env.ADMIN_REG_TOKEN) {
-    //   return res.status(403).json({ message: 'Недостаточно прав на создание admin' });
-    // }
+    // Если хочет responder — пока даём публичные права, а для Spec ставим pending
+    const authRole = requestedRole === 'responder' ? 'public' : requestedRole;
+    const specStatus = requestedRole === 'responder' ? 'pending' : undefined;
 
     const emailLC = emailRaw.toLowerCase();
 
-    // Проверки наличия
+    // Проверяем существование
     const [existsAuth, existsPeople, existsSpec] = await Promise.all([
       AuthUser.findOne({ $or: [{ email: emailRaw }, { email_lc: emailLC }] }),
       People.findOne({ $or: [{ email: emailLC }, { email_lc: emailLC }] }).lean(),
       Spec.findOne({ $or: [{ email: emailLC }, { email_lc: emailLC }] }).lean(),
     ]);
 
-    // === Случай 1: учётка уже есть в AuthUser
+    // === Случай 1: учётка уже есть в AuthUser ===
     if (existsAuth) {
-      // Профиль на ту же роль уже есть — конфликт
-      if ((role === 'public' && existsPeople) || (role === 'responder' && existsSpec)) {
+      // если просят создать профиль public, а People уже есть — конфликт
+      if ((requestedRole === 'public' && existsPeople) ||
+          (requestedRole === 'responder' && existsSpec)) {
         return res.status(409).json({ message: 'Email уже занят' });
       }
 
-      // Проверяем пароль — иначе нельзя “привязать” профиль к чужой учётке
+      // Проверяем пароль — иначе нельзя "привязать" профиль к чужой учётке
       const ok = await bcrypt.compare(password, existsAuth.password);
       if (!ok) return res.status(409).json({ message: 'Email уже занят' });
 
-      // Дозаводим недостающий профиль к существующей учётке
       let profileDoc = null;
-      if (role === 'public' && !existsPeople) {
+
+      // Дозаводим недостающий профиль в зависимости от ИСХОДНОГО выбора
+      if (requestedRole === 'public' && !existsPeople) {
         profileDoc = await People.create({
           user: existsAuth._id,
           email: emailLC,
           email_lc: emailLC,
-          role,
-          password: existsAuth.password, // хэш
+          role: 'public',
+          password: existsAuth.password,
         });
-      } else if (role === 'responder' && !existsSpec) {
+      } else if (requestedRole === 'responder' && !existsSpec) {
         profileDoc = await Spec.create({
           user: existsAuth._id,
           email: emailLC,
           email_lc: emailLC,
-          role,
+          role: 'responder',
           password: existsAuth.password,
+          status: 'pending', // <- ключевое
         });
-      } // admin — без профиля
+        // ВНИМАНИЕ: права пользователя НЕ повышаем здесь. Это делает админ через /api/admin/responders/:id/approve
+      }
+      // admin — отдельная история, как и раньше, профиль не создаём
 
       const token = jwt.sign(
         { id: existsAuth._id, email: existsAuth.email, role: existsAuth.role },
@@ -87,47 +95,54 @@ router.post('/register', async (req, res) => {
       );
 
       return res.status(201).json({
-        message: 'Профиль добавлен к существующей учётке',
+        message: requestedRole === 'responder'
+          ? 'Профиль создан. Ожидайте подтверждения администратором.'
+          : 'Профиль добавлен к существующей учётке',
         token,
-        role: existsAuth.role,
+        role: existsAuth.role,           // остаётся как было (скорее всего 'public')
         userId: existsAuth._id,
         profileId: profileDoc?._id || null,
       });
     }
 
-    // === Случай 2: создаём с нуля
+    // === Случай 2: создаём с нуля ===
     if (existsPeople || existsSpec) {
       return res.status(409).json({ message: 'Email уже занят' });
     }
 
     const hash = await bcrypt.hash(password, 10);
 
+    // 1) Базовая учётка (роль — public, если просили responder)
     const auth = await AuthUser.create({
       email: emailRaw,
       email_lc: emailLC,
       password: hash,
-      role,
+      role: authRole, // <- public, если изначально выбрали responder
     });
 
-    let profileDoc = null;
-    if (role === 'public') {
-      profileDoc = await People.create({
+    // 2) Профили
+    // Всегда есть People для public (и для "ожидающего responder" тоже)
+    const peopleDoc = await People.create({
+      user: auth._id,
+      email: emailLC,
+      email_lc: emailLC,
+      role: 'public',
+      password: hash,
+    });
+
+    let specDoc = null;
+    if (requestedRole === 'responder') {
+      specDoc = await Spec.create({
         user: auth._id,
         email: emailLC,
         email_lc: emailLC,
-        role,
+        role: 'responder',
         password: hash,
-      });
-    } else if (role === 'responder') {
-      profileDoc = await Spec.create({
-        user: auth._id,
-        email: emailLC,
-        email_lc: emailLC,
-        role,
-        password: hash,
+        status: 'pending', // <- ключевое
       });
     }
 
+    // 3) JWT (роль сейчас — authRole)
     const token = jwt.sign(
       { id: auth._id, email: auth.email, role: auth.role },
       JWT_SECRET,
@@ -135,11 +150,13 @@ router.post('/register', async (req, res) => {
     );
 
     return res.status(201).json({
-      message: 'Регистрация успешна',
+      message: requestedRole === 'responder'
+        ? 'Регистрация успешна. Ожидайте подтверждения администратором.'
+        : 'Регистрация успешна',
       token,
-      role: auth.role,
+      role: auth.role,                // public, пока админ не апрувнет
       userId: auth._id,
-      profileId: profileDoc?._id || null,
+      profileId: requestedRole === 'responder' ? (specDoc?._id || null) : (peopleDoc?._id || null),
     });
   } catch (err) {
     if (!NODE_ENV || NODE_ENV === 'development') {

@@ -4,6 +4,7 @@ const { Schema, model, Types } = mongoose;
 
 const SpecSchema = new Schema(
   {
+    
     user: { type: Types.ObjectId, ref: 'AuthUser', unique: true, index: true },
     email: { type: String, required: true, trim: true },
     email_lc: { type: String, required: true, index: true },
@@ -15,6 +16,7 @@ const SpecSchema = new Schema(
     phone: { type: String, trim: true },
     location: { type: String, trim: true },
     avatarUrl: { type: String, trim: true },
+    status: { type: String, enum: ['pending', 'active', 'suspended'], default: 'pending' },
     // Настройки
     theme: { type: String, enum: ['light', 'dark'], default: 'light' },
     language: { type: String, default: 'en' },

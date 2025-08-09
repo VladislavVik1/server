@@ -5,7 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-
+import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
@@ -40,7 +40,7 @@ app.use('/api', testRoutes);
 app.use('/api', reportRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api', mapRoutes);
-
+app.use('/api/admin', adminRoutes);
 // Статика React + шаблоны
 const buildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(buildPath)) {
