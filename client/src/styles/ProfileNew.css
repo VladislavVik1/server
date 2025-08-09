@@ -25,7 +25,7 @@
   color: white;
 }
 
-/* дальше — твои стили с заменой цветов на переменные */
+/* Сетка: всегда 3 колонки, ничего не прыгает */
 .pf2-wrap {
   min-height: calc(100vh - 80px);
   background: var(--page-bg);
@@ -43,6 +43,7 @@
   box-shadow: 0 8px 24px rgba(0,0,0,.08);
 }
 
+/* левая колонка */
 .pf2-left { padding: 16px; }
 .pf2-user { display:flex; gap:12px; align-items:center; padding:8px 8px 12px; }
 .pf2-user.sm { padding:0 }
@@ -53,7 +54,7 @@
 .pf2-menu { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .pf2-item, .pf2-item-row {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 14px; border-radius:12px; background: var(--soft);color: var(--text);
+  padding:12px 14px; border-radius:12px; background: var(--soft); color: var(--text);
   border:none; cursor:pointer; font:inherit;
 }
 .pf2-item:hover, .pf2-item-row:hover { background: var(--soft-hover); }
@@ -75,12 +76,9 @@
   border-color: var(--text);
 }
 
-.pf2-modal {
-  padding:18px;
-  max-width: 640px;
-  width: 100%;
-  justify-self: center;
-}
+/* центр (форма) */
+.pf2-center { align-self: start; }
+.pf2-modal { padding:18px; max-width: 640px; width: 100%; justify-self: center; }
 .pf2-modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 .pf2-x { border:none; background:transparent; font-size:20px; cursor:pointer; opacity:.6; }
 
@@ -102,27 +100,20 @@
 
 .pf2-actions { display:flex; gap:10px; padding:16px 4px; }
 .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: none;
-  background: var(--btn);
-  color: #fff;
-  cursor: pointer;
+  display:flex; align-items:center; justify-content:center;
+  padding:10px 14px; border-radius:10px; border:none; background: var(--btn); color:#fff; cursor:pointer;
 }
 .btn[disabled] { opacity:.6; cursor:not-allowed; }
 .btn.outline { background: var(--card-bg); color: var(--text); border:1px solid var(--border); }
 .btn.ghost { background: var(--soft-hover); color: var(--text); }
 
+/* правая колонка */
+.pf2-right { align-self: start; }
 .pf2-settings { padding:16px; }
-.pf2-title { font-weight:600; margin-bottom:8px; }
+.pf2-title { font-weight:600; margin-bottom:8px; color: var(--text); }
 .pf2-setting {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 14px;
-  background: var(--soft);
-  border-radius:12px;
+  padding:12px 14px; background: var(--soft); border-radius:12px;
 }
 .pf2-setting + .pf2-setting { margin-top:8px; }
 .pf2-setting select {
@@ -133,7 +124,23 @@
   color: var(--text);
 }
 
+/* видимость без сдвигов макета */
+.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+.is-open {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .18s ease, transform .18s ease, visibility 0s linear;
+}
+
+/* адаптив */
 @media (max-width: 1100px) {
   .pf2-wrap { grid-template-columns: 1fr; gap: 20px; }
+  .pf2-center, .pf2-right { align-self: stretch; }
   .pf2-modal { justify-self: stretch; max-width: 720px; }
 }
