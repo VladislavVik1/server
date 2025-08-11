@@ -19,15 +19,17 @@ export default function App() {
   useEffect(() => {
     if (token) {
       setAuthToken(token);
-
-
       api.get('/api/auth/profile')
         .then(res => setRole(res.data.role))
         .catch(() => setRole(''));
-
       navigate('/dashboard');
+    } else {
+      // Если пользователь не авторизован и зашёл на "/", отправляем на лендинг
+      if (window.location.pathname === '/') {
+        window.location.href = '/landing.html';
+      }
     }
-  }, [token]);
+  }, [token, navigate]);
 
   const handleLogin = (tok) => {
     localStorage.setItem('token', tok);
@@ -38,7 +40,7 @@ export default function App() {
     localStorage.removeItem('token');
     setToken(null);
     setRole('');
-    navigate('/login');
+    window.location.href = '/landing.html';
   };
 
   return (
@@ -46,24 +48,24 @@ export default function App() {
       {token && <Sidebar onLogout={handleLogout} role={role} />}
       <main className="content">
         <Routes>
-
+          {/* публичные роуты */}
           <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
           <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
 
-
+          {/* приватные роуты */}
           {token ? (
             <>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/report" element={<ReportPage />} />
               <Route path="/profile" element={<ProfilePage />} />
-              {role === 'admin' || role === 'responder' ? (
+              {(role === 'admin' || role === 'responder') && (
                 <Route path="/moderation" element={<ModerationPage />} />
-              ) : null}
+              )}
               <Route path="*" element={<Navigate to="/dashboard" />} />
             </>
           ) : (
-            <Route path="*" element={<Navigate to="/login" />} />
+            <Route path="*" element={<Navigate to="/landing.html" />} />  
           )}
         </Routes>
       </main>
