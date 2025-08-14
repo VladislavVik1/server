@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Layout/Sidebar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -15,6 +15,8 @@ export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [role, setRole] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   useEffect(() => {
     if (token) {
@@ -22,15 +24,19 @@ export default function App() {
       api.get('/api/auth/profile')
         .then(res => setRole(res.data.role))
         .catch(() => setRole(''));
-      navigate('/dashboard');
+  
+
+      const authPages = ['/', '/login', '/register', '/landing.html'];
+      if (authPages.includes(location.pathname)) {
+        navigate('/dashboard', { replace: true });
+      }
     } else {
-      // Если пользователь не авторизован и зашёл на "/", отправляем на лендинг
-      if (window.location.pathname === '/') {
+
+      if (location.pathname === '/') {
         window.location.href = '/landing.html';
       }
     }
-  }, [token, navigate]);
-
+  }, [token, navigate, location.pathname]);
   const handleLogin = (tok) => {
     localStorage.setItem('token', tok);
     setToken(tok);
