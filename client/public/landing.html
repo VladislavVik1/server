@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crimebook - Report Crimes, Enhance Safety</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -252,6 +254,7 @@
             justify-content: center;
             color: white;
             font-size: 1.5rem;
+            margin-top: 50px;
         }
         
         /* Features Section */
@@ -644,46 +647,104 @@
             }
         }
     </style>
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""
+/>
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""
+></script>
+<!-- Heatmap plugin -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<!-- Размеры контейнера карты (не ломает твои стили) -->
+<style>
+.predictive-viz { padding: 0; height: 400px; }
+#crimeMap { width: 100%; height: 100%; border-radius: 15px; display:block; }
+</style>
+
+<!-- Наш JS (вынесенная логика карты) -->
+<script defer src="/js/landing-map.js"></script>
+<!-- Chart.js для графиков -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- Наш файл с аналитикой -->
+<script defer src="/js/landing-analytics.js"></script>
+
+<style>
+  /* Мини-дашборд: карточки + холсты */
+  .ana-wrap { width:100%; padding:12px; }
+  .ana-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .ana-card {
+    background: rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px; padding:16px;
+    color:#fff; backdrop-filter: blur(8px);
+  }
+  .ana-card h4 { font-size:14px; font-weight:600; opacity:.85; margin:0 0 6px; }
+  .ana-card .num { font-size:28px; font-weight:800; line-height:1; }
+  .ana-grids { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .ana-panel {
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px; padding:12px;
+    height: 260px; display:flex; align-items:center;
+  }
+  .ana-panel canvas { width:100% !important; height:220px !important; }
+  @media (max-width: 992px) {
+    .ana-kpis { grid-template-columns:1fr; }
+    .ana-grids { grid-template-columns:1fr; }
+  }
+</style>
 </head>
 <body>
+
     <!-- Header -->
     <header>
         <div class="container">
             <nav>
-                <a href="#" class="logo">
-                    <i class="fas fa-shield-alt"></i>
-                    Crimebook
-                </a>
-                <ul class="nav-links" id="navLinks">
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#predictive">Predictive Analysis</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="#contact" class="btn btn-outline">Get Started</a></li>
-                </ul>
-                <div class="mobile-toggle" id="mobileToggle">
-                    <i class="fas fa-bars"></i>
-                </div>
+              <a href="#" class="logo">
+                <i class="fas fa-shield-alt"></i>
+                Crimebook
+              </a>
+              <ul class="nav-links" id="navLinks">
+                <li><a href="#report">Report A Crime</a></li>
+                <li><a href="#reports">Crime Reports</a></li>
+                <li><a href="#map">Crime Map</a></li>
+                <li><a href="/login">Dashboard</a></li>
+                <li><a href="/login" class="btn btn-outline">Sign Up / Log In</a></li>
+              </ul>
+              
+              <div class="mobile-toggle" id="mobileToggle">
+                <i class="fas fa-bars"></i>
+              </div>
             </nav>
         </div>
     </header>
 
     <!-- Hero Section -->
+    <section id="map">
     <section class="hero">
         <div class="container">
             <div class="hero-content">
                 <h1>Report Crimes. Enhance Safety.</h1>
                 <p>Crimebook empowers citizens and authorities to collaborate in creating safer communities through real-time crime reporting and data-driven insights.</p>
                 <div class="hero-btns">
+                    
                     <a href="#contact" class="btn btn-secondary">Report Incident</a>
                     <a href="#features" class="btn btn-outline">Learn More</a>
                 </div>
             </div>
             <div class="hero-image">
-                <div>Interactive Crime Map Visualization</div>
-            </div>
+                <div id="crimeMap"></div>
+              </div>
         </div>
     </section>
+</section>
 
     <!-- Features Section -->
     <section class="features" id="features">
@@ -758,24 +819,32 @@
     </section>
 
     <!-- Predictive Analysis -->
+    <section id="reports">
     <section class="predictive" id="predictive">
         <div class="container">
+            
             <div class="predictive-content">
                 <div class="predictive-text">
                     <h2>Predictive Crime Prevention</h2>
                     <p>Crimebook uses advanced data analytics to identify patterns and predict potential crime hotspots before incidents occur.</p>
                     <p>By analyzing historical data, time patterns, and geographical information, our system generates heatmaps and risk assessments that help law enforcement deploy resources proactively.</p>
                     <div class="hero-btns" style="margin-top: 2rem;">
-                        <a href="#" class="btn btn-secondary">See Predictive Model</a>
+                        <a href="#map" class="btn btn-secondary">See Predictive Model</a>
                     </div>
                 </div>
                 <div class="predictive-viz">
-                    <div>Crime Prediction Heatmap Visualization</div>
-                </div>
+                    <div id="analyticsRoot"></div>
+                  </div>
             </div>
         </div>
     </section>
+</section>
+<Style>
+    #analyticsRoot{
+        width: 700px;
 
+    }
+</Style>
     <!-- Testimonials -->
     <section class="testimonials" id="testimonials">
         <div class="container">
@@ -824,17 +893,19 @@
     </section>
 
     <!-- CTA Section -->
+    <section id="report">
     <section class="cta" id="contact">
         <div class="container">
             <h2>Join the Safety Revolution</h2>
             <p>Help create safer communities by reporting incidents or partnering with us to implement Crimebook in your area.</p>
             <div class="hero-btns" style="justify-content: center;">
+                
                 <a href="/login" class="btn btn-secondary">Report an Incident</a>
                 <a href="/login" class="btn btn-outline">Request a Demo</a>
             </div>
         </div>
     </section>
-
+</section>
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -927,5 +998,16 @@
             }
         });
     </script>
+    <style id="map-size-fix">
+        .predictive-viz { padding: 0; }             
+        .predictive-viz { height: 400px; }              
+        #crimeMap {
+          display: block;
+          width: 100%;
+          height: 100%;                                  
+          min-height: 340px;
+          border-radius: 15px;
+        }
+      </style>
 </body>
 </html>
