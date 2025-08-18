@@ -4,10 +4,11 @@ dotenv.config();
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
-import AuthUser from '../models/AuthUser.js';  
-import People from '../models/People.js';      
-import Spec from '../models/Spec.js';          
+import AuthUser from '../models/AuthUser.js';
+import People from '../models/People.js';
+import Spec from '../models/Spec.js';
 
 import { authenticate } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
@@ -15,15 +16,20 @@ import { upload } from '../middleware/upload.js';
 const router = express.Router();
 const { JWT_SECRET = 'dev_secret', JWT_EXPIRATION = '1d', NODE_ENV } = process.env;
 
+// безопасное объявление модели для старой коллекции `pwd`
+const PwdUser =
+  mongoose.models.PwdUser ||
+  mongoose.model('PwdUser', new mongoose.Schema({}, { strict: false }), 'pwd');
 
+const isBcrypt = (s) => typeof s === 'string' && /^\$2[aby]\$/.test(s);
 const profileModelByRole = (role) => (role === 'responder' ? Spec : People);
 
-
+/* ===================== REGISTER ===================== */
 router.post('/register', async (req, res) => {
   try {
     const emailRaw = String(req.body.email || '').trim();
     const password = String(req.body.password || '');
-    const requestedRole = String(req.body.role || '').trim(); // 
+    const requestedRole = String(req.body.role || '').trim();
 
     if (!emailRaw || !password || !requestedRole) {
       return res.status(400).json({ message: 'email, password , role оare required' });
@@ -33,37 +39,29 @@ router.post('/register', async (req, res) => {
     }
 
     const authRole = requestedRole === 'responder' ? 'public' : requestedRole;
-    const specStatus = requestedRole === 'responder' ? 'pending' : undefined;
-
     const emailLC = emailRaw.toLowerCase();
 
- 
     const [existsAuth, existsPeople, existsSpec] = await Promise.all([
-      AuthUser.findOne({ $or: [{ email: emailRaw }, { email_lc: emailLC }] }),
-      People.findOne({ $or: [{ email: emailLC }, { email_lc: emailLC }] }).lean(),
-      Spec.findOne({ $or: [{ email: emailLC }, { email_lc: emailLC }] }).lean(),
+      // Ищем только по полю email
+      AuthUser.findOne({ $or: [{ email: emailRaw }, { email: emailLC }] }),
+      People.findOne({ $or: [{ email: emailRaw }, { email: emailLC }] }).lean(),
+      Spec.findOne({ $or: [{ email: emailRaw }, { email: emailLC }] }).lean(),
     ]);
 
-
     if (existsAuth) {
-
       if ((requestedRole === 'public' && existsPeople) ||
           (requestedRole === 'responder' && existsSpec)) {
         return res.status(409).json({ message: 'Email alredy used' });
       }
 
-
       const ok = await bcrypt.compare(password, existsAuth.password);
       if (!ok) return res.status(409).json({ message: 'Email alredy used' });
 
       let profileDoc = null;
-
-
       if (requestedRole === 'public' && !existsPeople) {
         profileDoc = await People.create({
           user: existsAuth._id,
           email: emailLC,
-          email_lc: emailLC,
           role: 'public',
           password: existsAuth.password,
         });
@@ -71,14 +69,11 @@ router.post('/register', async (req, res) => {
         profileDoc = await Spec.create({
           user: existsAuth._id,
           email: emailLC,
-          email_lc: emailLC,
           role: 'responder',
           password: existsAuth.password,
-          status: 'pending', 
+          status: 'pending',
         });
-      
       }
-   
 
       const token = jwt.sign(
         { id: existsAuth._id, email: existsAuth.email, role: existsAuth.role },
@@ -91,12 +86,11 @@ router.post('/register', async (req, res) => {
           ? 'Profile is create. Wait approved from admin.'
           : 'Profile add successfully',
         token,
-        role: existsAuth.role,           
+        role: existsAuth.role,
         userId: existsAuth._id,
         profileId: profileDoc?._id || null,
       });
     }
-
 
     if (existsPeople || existsSpec) {
       return res.status(409).json({ message: 'Email уже занят' });
@@ -104,18 +98,16 @@ router.post('/register', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 10);
 
+    // Храним пароли только в authusers; email всегда нижним регистром
     const auth = await AuthUser.create({
-      email: emailRaw,
-      email_lc: emailLC,
+      email: emailLC,
       password: hash,
-      role: authRole, 
+      role: authRole,
     });
-
 
     const peopleDoc = await People.create({
       user: auth._id,
       email: emailLC,
-      email_lc: emailLC,
       role: 'public',
       password: hash,
     });
@@ -125,14 +117,12 @@ router.post('/register', async (req, res) => {
       specDoc = await Spec.create({
         user: auth._id,
         email: emailLC,
-        email_lc: emailLC,
         role: 'responder',
         password: hash,
-        status: 'pending', 
+        status: 'pending',
       });
     }
 
-  
     const token = jwt.sign(
       { id: auth._id, email: auth.email, role: auth.role },
       JWT_SECRET,
@@ -144,7 +134,7 @@ router.post('/register', async (req, res) => {
         ? 'Profile is create. Wait approved from admin.'
         : 'Profile add successfully',
       token,
-      role: auth.role,              
+      role: auth.role,
       userId: auth._id,
       profileId: requestedRole === 'responder' ? (specDoc?._id || null) : (peopleDoc?._id || null),
     });
@@ -158,7 +148,10 @@ router.post('/register', async (req, res) => {
     return res.status(500).json({ message: 'Error register', error: err.message });
   }
 });
+/* ==================================================== */
 
+
+/* ============== LOGIN (с миграцией из `pwd`) ============== */
 router.post('/login', async (req, res) => {
   try {
     const emailRaw = String(req.body.email || '').trim();
@@ -168,29 +161,77 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'email and password are required' });
     }
 
-    const auth = await AuthUser.findOne({
-      $or: [{ email: emailRaw }, { email_lc: emailRaw.toLowerCase() }],
+    const emailLC = emailRaw.toLowerCase();
+
+    // 1) новая коллекция authusers
+    let user = await AuthUser.findOne({
+      $or: [{ email: emailRaw }, { email: emailLC }]
     });
 
-    if (!auth) return res.status(401).json({ message: 'Wrong data' });
+    // 2) если не нашли — старая коллекция pwd
+    if (!user) {
+      const legacy = await PwdUser.findOne({
+        $or: [
+          { email: emailRaw }, { email: emailLC },
+          { login: emailRaw }, { login: emailLC }
+        ]
+      });
 
-    const ok = await bcrypt.compare(password, auth.password);
-    if (!ok) return res.status(401).json({ message: 'Wrong data' });
+      if (!legacy) return res.status(401).json({ message: 'Wrong data' });
+
+      const legacyPass = String(legacy.password || legacy.pass || legacy.pwd || '');
+      const passOk = isBcrypt(legacyPass)
+        ? await bcrypt.compare(password, legacyPass)
+        : legacyPass === password;
+
+      if (!passOk) return res.status(401).json({ message: 'Wrong data' });
+
+      // MIGRATION → сохраняем/обновляем в authusers
+      const normalizedEmail =
+        (legacy.email && String(legacy.email)) ||
+        (legacy.login && String(legacy.login)) ||
+        emailRaw;
+
+      const emailNormLC = normalizedEmail.toLowerCase();
+      const hashed = isBcrypt(legacyPass) ? legacyPass : await bcrypt.hash(password, 10);
+      const role =
+        (legacy.role && String(legacy.role)) ||
+        (legacy.isAdmin ? 'admin' : 'user') ||
+        'user';
+
+      user = await AuthUser.findOneAndUpdate(
+        { email: emailNormLC },
+        {
+          $set: {
+            email: emailNormLC,
+            password: hashed,
+            role
+          }
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    } else {
+      // обычная проверка пароля
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) return res.status(401).json({ message: 'Wrong data' });
+    }
 
     const token = jwt.sign(
-      { id: auth._id, email: auth.email, role: auth.role },
+      { id: user._id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
 
-    return res.json({ token, role: auth.role });
+    return res.json({ token, role: user.role });
   } catch (err) {
     console.error('auth/login error:', err);
     return res.status(500).json({ message: 'Error enter', error: err.message });
   }
 });
+/* ========================================================== */
 
 
+/* ===================== PROFILE GET ===================== */
 router.get('/profile', authenticate(), async (req, res) => {
   try {
     const { id, role } = req.user;
@@ -225,8 +266,10 @@ router.get('/profile', authenticate(), async (req, res) => {
     return res.status(500).json({ message: 'Server Error', error: err.message });
   }
 });
+/* ====================================================== */
 
 
+/* ===================== PROFILE PUT ==================== */
 router.put('/profile', authenticate(), async (req, res) => {
   try {
     const { id, role } = req.user;
@@ -264,8 +307,10 @@ router.put('/profile', authenticate(), async (req, res) => {
     return res.status(500).json({ message: 'Error Save Profile', error: err.message });
   }
 });
+/* ====================================================== */
 
 
+/* ===================== AVATAR UPLOAD ================== */
 router.post('/avatar', authenticate(), upload.single('avatar'), async (req, res) => {
   try {
     const { id, role } = req.user;
@@ -286,8 +331,10 @@ router.post('/avatar', authenticate(), upload.single('avatar'), async (req, res)
     return res.status(500).json({ message: 'Error Download', error: err.message });
   }
 });
+/* ====================================================== */
 
 
+/* ===================== PASSWORD CHANGE ================ */
 router.post('/password', authenticate(), async (req, res) => {
   try {
     const { id } = req.user;
@@ -312,5 +359,6 @@ router.post('/password', authenticate(), async (req, res) => {
     return res.status(500).json({ message: 'Error Change Password', error: err.message });
   }
 });
+/* ====================================================== */
 
 export default router;
